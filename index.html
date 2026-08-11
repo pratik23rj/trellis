@@ -1,0 +1,1229 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Trellis · Renewals</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'] },
+      colors: {
+        border: '#e5e7eb',
+        ring: '#a1a1aa',
+        background: '#ffffff',
+        foreground: '#111827',
+        muted: { DEFAULT: '#f5f5f5', foreground: '#6b7280' },
+        sidebar: { DEFAULT: '#fafafa', accent: '#f4f4f5' },
+      },
+      borderRadius: { lg: '0.625rem', xl: '0.75rem' },
+      boxShadow: {
+        card: '0 1px 2px 0 rgb(0 0 0 / 0.04)',
+        seg: '0 1px 2px 0 rgb(0 0 0 / 0.06), 0 0 0 1px rgb(0 0 0 / 0.04)',
+        pop: '0 8px 24px -6px rgb(0 0 0 / 0.14), 0 0 0 1px rgb(0 0 0 / 0.06)',
+        drawer: '-16px 0 48px -12px rgb(9 9 11 / 0.18), 0 0 0 1px rgb(9 9 11 / 0.06)',
+        toast: '0 12px 32px -8px rgb(9 9 11 / 0.32)',
+      },
+      transitionTimingFunction: { snap: 'cubic-bezier(0.32, 0.72, 0.28, 1)' },
+    },
+  },
+};
+</script>
+<style type="text/tailwindcss">
+  @layer base {
+    html { -webkit-font-smoothing: antialiased; }
+    body { @apply bg-white text-foreground font-sans; }
+    .num { font-variant-numeric: tabular-nums; font-feature-settings: 'tnum' 1; }
+    :focus-visible { @apply outline-none ring-2 ring-ring/60 ring-offset-1 ring-offset-white; }
+    ::placeholder { @apply text-gray-400; }
+  }
+  @layer components {
+    .btn {
+      @apply inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm
+             font-medium transition-colors disabled:pointer-events-none disabled:opacity-50;
+    }
+    .btn-outline { @apply btn h-9 border border-border bg-white px-3 text-gray-700 shadow-card hover:bg-gray-50; }
+    .btn-ghost-icon { @apply btn h-8 w-8 text-gray-500 hover:bg-gray-100 hover:text-gray-900; }
+    .btn-sq { @apply btn h-9 w-9 border border-border bg-white text-gray-600 shadow-card hover:bg-gray-50 hover:text-gray-900; }
+    .btn-act { @apply btn h-10 border border-border bg-white px-4 text-[15px] text-gray-900 shadow-card hover:bg-gray-50; }
+    .btn-danger-text { @apply btn h-10 px-1 text-[15px] text-red-600 hover:text-red-700 hover:underline underline-offset-4; }
+    .btn-solid { @apply btn h-10 bg-gray-950 px-4 text-[15px] text-white hover:bg-black; }
+    .btn-danger { @apply btn h-10 bg-red-600 px-4 text-[15px] text-white hover:bg-red-700; }
+    .card { @apply rounded-xl border border-border bg-white shadow-card; }
+    .badge { @apply inline-flex items-center gap-1 whitespace-nowrap rounded-full text-xs font-medium leading-none; }
+    .input {
+      @apply h-9 w-full rounded-lg border border-border bg-white px-3 text-sm text-gray-900
+             shadow-card transition-shadow focus:border-gray-300;
+    }
+    .seg { @apply inline-flex items-center gap-0.5 rounded-lg bg-muted p-0.5; }
+    .seg-item { @apply btn h-8 gap-1.5 rounded-[7px] px-3 text-[13px] font-medium text-gray-600 hover:text-gray-900; }
+    .seg-item[aria-selected='true'] { @apply bg-white text-gray-900 shadow-seg; }
+    .seg-count { @apply num text-[13px] font-medium text-gray-500; }
+    .seg-item[aria-selected='true'] .seg-count { @apply text-gray-900; }
+    .nav-item {
+      @apply btn h-10 w-full justify-start gap-3 px-3 text-[14px] font-medium text-gray-600
+             hover:bg-sidebar-accent hover:text-gray-900;
+    }
+    .nav-item[aria-current='page'] { @apply bg-sidebar-accent text-gray-900; }
+    .menu-item { @apply btn h-9 w-full justify-start gap-2 rounded-md px-2 text-[13px] font-medium text-gray-700 hover:bg-gray-100; }
+    .th { @apply px-4 py-2.5 text-left text-[14px] font-medium text-gray-800; }
+    .td { @apply px-4 py-2 align-middle; }
+    /* drawer */
+    .sec-h { @apply border-t border-border pt-5 text-[16px] font-medium text-gray-900; }
+    .f-k { @apply text-[14px] leading-5 text-gray-500; }
+    .f-v { @apply mt-1 text-[15px] font-medium leading-5 text-gray-900; }
+    .field-lab { @apply mb-1.5 block text-[13px] font-medium text-gray-800; }
+    .field-inp {
+      @apply w-full rounded-lg border border-border bg-white px-3 py-2 text-[13.5px] text-gray-900
+             shadow-card focus:border-gray-300;
+    }
+  }
+  @layer utilities { .rail-hide { display: none !important; } }
+  .kpi-card { container-type: inline-size; }
+  .kpi-head { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
+  @container (min-width: 268px) {
+    .kpi-head { flex-direction: row; align-items: center; gap: 10px; }
+  }
+
+  .scroll-x { scrollbar-width: thin; scrollbar-color: #d4d4d8 transparent; padding-bottom: 2px; }
+  .scroll-x::-webkit-scrollbar { height: 6px; }
+  .scroll-x::-webkit-scrollbar-thumb { background: #d4d4d8; border-radius: 9999px; }
+  .scroll-x::-webkit-scrollbar-track { background: transparent; }
+  .scroll-y { scrollbar-width: thin; scrollbar-color: #d4d4d8 transparent; }
+  .scroll-y::-webkit-scrollbar { width: 8px; }
+  .scroll-y::-webkit-scrollbar-thumb { background: #d4d4d8; border-radius: 9999px; }
+  @media (prefers-reduced-motion: reduce) {
+    * { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+  }
+</style>
+</head>
+<body class="h-full">
+<div class="flex h-screen overflow-hidden bg-white">
+
+  <!-- ───────────────────────── Sidebar ───────────────────────── -->
+  <aside id="sidebar"
+         class="flex w-[216px] shrink-0 flex-col border-r border-border bg-sidebar transition-[width] duration-200 ease-snap">
+    <div id="brand" class="flex h-[72px] items-center gap-2.5 px-4">
+      <div class="grid h-9 w-9 shrink-0 place-items-center rounded-[10px] bg-gray-950 text-white">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+             stroke-linejoin="round" class="h-[18px] w-[18px]">
+          <path d="M18 3a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3H6a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3h12a3 3 0 0 0 3-3 3 3 0 0 0-3-3z"/>
+        </svg>
+      </div>
+      <div data-rail-label class="min-w-0 leading-tight">
+        <div class="truncate text-[15px] font-medium text-gray-900">Anvaya Tech</div>
+        <div class="truncate text-[13px] text-gray-500">Enterprise</div>
+      </div>
+    </div>
+
+    <nav class="flex flex-1 flex-col gap-1 px-3" aria-label="Main">
+      <a href="#" class="nav-item" title="Dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"
+             stroke-linejoin="round" class="h-[18px] w-[18px] shrink-0">
+          <rect width="20" height="14" x="2" y="5" rx="2"/><path d="M2 10h20"/>
+        </svg>
+        <span data-rail-label>Dashboard</span>
+      </a>
+      <a href="#" class="nav-item" aria-current="page" title="Renewal">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"
+             stroke-linejoin="round" class="h-[18px] w-[18px] shrink-0">
+          <path d="M21 7.5V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h3.5"/><path d="M16 2v4"/>
+          <path d="M8 2v4"/><path d="M3 10h5"/><circle cx="16" cy="16" r="6"/><path d="M17.5 17.5 16 16.3V14"/>
+        </svg>
+        <span data-rail-label>Renewal</span>
+      </a>
+      <a href="#" class="nav-item" title="Vendors">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"
+             stroke-linejoin="round" class="h-[18px] w-[18px] shrink-0">
+          <path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/>
+          <path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/>
+          <path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/>
+          <path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/>
+        </svg>
+        <span data-rail-label>Vendors</span>
+      </a>
+    </nav>
+
+    <div class="p-3">
+      <button class="btn h-12 w-full justify-start gap-2.5 px-2 text-left hover:bg-sidebar-accent">
+        <span class="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-gradient-to-br from-violet-400 via-fuchsia-400 to-rose-300 text-[11px] font-semibold text-white/95">PN</span>
+        <span data-rail-label class="min-w-0 flex-1 leading-tight">
+          <span class="block truncate text-[13px] font-medium text-gray-900">Priya Nair</span>
+          <span class="block truncate text-[12px] text-gray-500">priya.nair@anvaya.in</span>
+        </span>
+        <svg data-rail-label viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 shrink-0 text-gray-400">
+          <path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/>
+        </svg>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ───────────────────────── Main ───────────────────────── -->
+  <div class="flex min-w-0 flex-1 flex-col">
+    <header class="flex h-[72px] shrink-0 items-center gap-3 border-b border-border px-5">
+      <button id="sbToggle" class="btn-ghost-icon" aria-expanded="true" aria-controls="sidebar"
+              aria-label="Collapse sidebar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"
+             stroke-linejoin="round" class="h-[19px] w-[19px]">
+          <rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/>
+        </svg>
+      </button>
+      <span class="h-5 w-px bg-border"></span>
+      <nav aria-label="Breadcrumb" class="flex items-center gap-2 text-[15px]">
+        <a href="#" class="rounded text-gray-500 hover:text-gray-900">Trellis</a>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+             stroke-linejoin="round" class="h-3.5 w-3.5 text-gray-400"><path d="m9 18 6-6-6-6"/></svg>
+        <span class="font-medium text-gray-900" aria-current="page">Renewals</span>
+      </nav>
+    </header>
+
+    <main class="min-h-0 flex-1 overflow-y-auto px-6 py-6">
+      <section id="kpis" class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4"
+               aria-label="Portfolio signals"></section>
+
+      <div class="mt-5 flex flex-wrap items-center gap-3">
+        <label class="sr-only" for="q">Search vendor or owner</label>
+        <input id="q" type="search" class="input max-w-[300px]" placeholder="Search vendor or owner..." autocomplete="off" />
+        <div id="tabs" class="seg" role="tablist" aria-label="Filter renewals"></div>
+        <div class="relative ml-auto">
+          <button id="sortBtn" class="btn-outline" aria-haspopup="menu" aria-expanded="false">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"
+                 stroke-linejoin="round" class="h-[17px] w-[17px] text-gray-500">
+              <path d="m3 16 4 4 4-4"/><path d="M7 20V4"/><path d="M11 4h4"/><path d="M11 9h7"/><path d="M11 14h10"/>
+            </svg>
+            <span class="text-gray-500">Sort by</span>
+            <span id="sortLabel" class="font-medium text-gray-900">Date</span>
+          </button>
+          <div id="sortMenu" role="menu" aria-labelledby="sortBtn"
+               class="absolute right-0 z-30 mt-2 hidden w-[232px] rounded-xl bg-white p-1 shadow-pop">
+            <p class="px-2 pb-1 pt-1.5 text-[11px] font-medium uppercase tracking-wider text-gray-400">Sort by</p>
+            <button class="menu-item" role="menuitemradio" data-sort="date">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                   stroke-linejoin="round" class="h-3.5 w-3.5 shrink-0 opacity-0" data-check><path d="M20 6 9 17l-5-5"/></svg>
+              <span class="flex-1 text-left">Date</span>
+              <span class="text-[12px] font-normal text-gray-400" data-dir></span>
+            </button>
+            <button class="menu-item" role="menuitemradio" data-sort="value">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                   stroke-linejoin="round" class="h-3.5 w-3.5 shrink-0 opacity-0" data-check><path d="M20 6 9 17l-5-5"/></svg>
+              <span class="flex-1 text-left">Annual value</span>
+              <span class="text-[12px] font-normal text-gray-400" data-dir></span>
+            </button>
+            <p class="border-t border-border px-2 pb-1 pt-2 text-[12px] text-gray-400">
+              Pick the active option again to flip the direction.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card mt-4 overflow-hidden">
+        <div class="scroll-x overflow-x-auto">
+          <table class="w-full min-w-[1020px] table-fixed border-collapse">
+            <colgroup>
+              <col class="w-[15%]"><col class="w-[15%]"><col class="w-[14%]"><col class="w-[13%]">
+              <col class="w-[11%]"><col class="w-[11%]"><col class="w-[21%]">
+            </colgroup>
+            <thead>
+              <tr class="border-b border-border bg-gray-50">
+                <th scope="col" class="th">Vendor</th>
+                <th scope="col" class="th">Annual Value</th>
+                <th scope="col" class="th">Act By</th>
+                <th scope="col" class="th">Window</th>
+                <th scope="col" class="th">Renewal</th>
+                <th scope="col" class="th">Usage</th>
+                <th scope="col" class="th">Owner</th>
+              </tr>
+            </thead>
+            <tbody id="tbody"></tbody>
+          </table>
+        </div>
+        <p id="empty" class="hidden px-4 py-14 text-center text-[14px] text-gray-500">
+          No renewals match that search. Clear the search box to see the full list.
+        </p>
+        <div id="pager" class="flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-border px-4 py-3"></div>
+      </div>
+
+      <div class="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2 px-1 text-[12px] text-gray-500">
+        <span class="inline-flex items-center gap-2"><span class="h-1 w-6 rounded-full bg-gray-200"></span>Can still cancel</span>
+        <span class="inline-flex items-center gap-2"><span class="h-3 w-0.5 rounded-full bg-gray-900"></span>Notice deadline</span>
+        <span class="inline-flex items-center gap-2"><span class="h-1 w-6 rounded-full bg-gray-400"></span>Locked in</span>
+        <span class="inline-flex items-center gap-2"><span class="h-4 w-0.5 rounded-full bg-red-600"></span>Today</span>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- ───────────────────────── Drawer ───────────────────────── -->
+<div id="scrim" class="pointer-events-none fixed inset-0 z-40 bg-gray-950/20 opacity-0 transition-opacity duration-200"></div>
+<aside id="drawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle"
+       class="fixed inset-y-4 right-4 z-50 flex w-[480px] max-w-[calc(100vw-2rem)] translate-x-[calc(100%+1.5rem)]
+              flex-col overflow-hidden rounded-2xl bg-white shadow-drawer transition-transform duration-300 ease-snap"></aside>
+
+<div id="toast" class="pointer-events-none fixed bottom-6 left-1/2 z-[60] flex -translate-x-1/2 translate-y-3 items-center
+                       gap-5 rounded-xl bg-gray-950 px-4 py-3 text-[14px] text-white opacity-0 shadow-toast transition-all duration-200">
+  <span id="toastMsg"></span>
+  <button id="toastUndo" class="font-medium text-emerald-300 underline underline-offset-4">Undo</button>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   Data. Today is 10 August 2026. Headcount 320.
+   Table figures come from the Renewals spec screens; the drawer
+   derives payment history and the notice deadline from them, so
+   every number in the sheet ties back to its row.
+   ═══════════════════════════════════════════════════════════════ */
+const TODAY = new Date(2026, 7, 10);
+const DAY = 86400000;
+const HEADCOUNT = 320;
+const LOOKBACK = 150;
+
+const SUBS = [
+  { id:'sonarqube', v:'SonarQube', cat:'Engineering', val:1470000, ren:'2026-09-09', type:'Manual', notice:30, bought:58, active:42, yoy:14, owner:'Jasleen Reddy' },
+  { id:'github-enterprise', v:'GitHub Enterprise', cat:'Engineering', val:17790000, ren:'2026-09-11', type:'Auto-renew', notice:30, bought:320, active:212, yoy:16, owner:'Sujata Sardesai' },
+  { id:'exotel', v:'Exotel', cat:'Communication', val:390000, ren:'2026-09-26', type:'Auto-renew', notice:45, bought:17, active:14, yoy:14, owner:'Vikram Krishnan' },
+  { id:'kandji', v:'Kandji', cat:'IT', val:120000, ren:'2026-09-11', type:'Manual', notice:30, bought:34, active:26, yoy:22, owner:'Tarun Khanna' },
+  { id:'figma', v:'Figma', cat:'Design', val:3920000, ren:'2026-11-11', type:'Auto-renew', notice:90, bought:236, active:210, yoy:11, owner:'Rohan Iyer' },
+  { id:'mercer-mettl', v:'Mercer Mettl', cat:'Recruiting', val:50000, ren:'2026-10-13', type:'Auto-renew', notice:60, bought:6, active:6, yoy:13, owner:'Omkar Marathe' },
+  { id:'sales-navigator', v:'Sales Navigator', cat:'Sales', val:8220000, ren:'2026-09-13', type:'Auto-renew', notice:30, bought:292, active:116, yoy:15, owner:'Anup Acharya' },
+  { id:'workato', v:'Workato', cat:'Productivity', val:1320000, ren:'2026-11-12', type:'Auto-renew', notice:90, bought:30, active:23, yoy:6, owner:'Farida Ghosh' },
+  { id:'canva-teams', v:'Canva Teams', cat:'Design', val:3560000, ren:'2026-11-13', type:'Auto-renew', notice:90, bought:176, active:117, yoy:20, owner:'Sarika Pawar' },
+  { id:'darwinbox', v:'Darwinbox', cat:'Design', val:4280000, ren:'2026-11-14', type:'Auto-renew', notice:90, bought:320, active:312, yoy:11, owner:'Meera Raghavan' },
+  { id:'snowflake', v:'Snowflake', cat:'Data', val:13690000, ren:'2026-11-15', type:'Auto-renew', notice:90, bought:240, active:88, yoy:16, owner:'Priya JP' },
+  { id:'mongodb-atlas', v:'MongoDB Atlas', cat:'Infrastructure', val:6900000, ren:'2026-09-16', type:'Auto-renew', notice:30, bought:265, active:117, yoy:10, owner:'Madhav Saha' },
+  { id:'vymo-sales', v:'Vymo Sales', cat:'Sales', val:3280000, ren:'2026-10-10', type:'Auto-renew', notice:60, bought:266, active:131, yoy:9, owner:null, ownerNote:'Gopal Chauhan left in April 2026' },
+  { id:'instamojo', v:'Instamojo', cat:'Payments', val:2600000, ren:'2026-09-10', type:'Auto-renew', notice:30, bought:118, active:67, yoy:15, owner:null, ownerNote:'Hemant Patil left in May 2026' },
+  { id:'zoho-inventory', v:'Zoho Inventory', cat:'Finance', val:2640000, ren:'2026-09-12', type:'Auto-renew', notice:30, bought:238, active:146, yoy:12, owner:null, ownerNote:'Owner moved teams in July 2026' },
+  { id:'datadog', v:'Datadog', cat:'Infrastructure', val:3920000, ren:'2026-09-14', type:'Auto-renew', notice:30, bought:240, active:82, yoy:6, owner:null, ownerNote:'Karthik Menon left in January 2026' },
+  { id:'zoho-creator', v:'Zoho Creator', cat:'Productivity', val:4710000, ren:'2026-09-29', type:'Auto-renew', notice:45, bought:277, active:96, yoy:13, owner:null, ownerNote:'Reassignment pending since April 2026' },
+  { id:'mailchimp', v:'Mailchimp', cat:'Marketing', val:1320000, ren:'2026-09-15', type:'Auto-renew', notice:30, bought:51, active:39, yoy:15, owner:null, ownerNote:'Owner moved teams in May 2026' },
+  { id:'perfios', v:'Perfios', cat:'Compliance', val:2660000, ren:'2026-09-17', type:'Manual', notice:30, bought:320, active:163, yoy:7, owner:null, ownerNote:'Mrunal Tripathi left in May 2026' },
+  { id:'seqrite-endpoint', v:'Seqrite Endpoint', cat:'Security', val:390000, ren:'2026-11-16', type:'Auto-renew', notice:90, bought:16, active:10, yoy:8, owner:null, ownerNote:'Mrunal Tripathi left in January 2026' },
+  { id:'pagerduty', v:'PagerDuty', cat:'DevOps', val:1340000, ren:'2026-09-18', type:'Auto-renew', notice:30, bought:76, active:54, yoy:10, owner:null, ownerNote:'Siddharth Bansal left in April 2026' },
+  { id:'navan', v:'Navan', cat:'Finance', val:4400000, ren:'2026-09-20', type:'Manual', notice:30, bought:211, active:77, yoy:14, owner:null, ownerNote:'Suresh Tripathi left in May 2026' },
+  { id:'setu', v:'Setu', cat:'Payments', val:5680000, ren:'2026-10-22', type:'Auto-renew', notice:60, bought:320, active:233, yoy:14, owner:null, ownerNote:'Ramya Shukla left in March 2026' },
+  { id:'freshservice', v:'Freshservice', cat:'IT', val:130000, ren:'2026-09-23', type:'Auto-renew', notice:30, bought:11, active:9, yoy:1, owner:null, ownerNote:'Reassignment pending since June 2026' },
+  { id:'servetel', v:'Servetel', cat:'Communication', val:280000, ren:'2026-10-09', type:'Auto-renew', notice:45, bought:16, active:14, yoy:19, owner:null, ownerNote:'Ishita Patel left in February 2026' },
+  { id:'hrone', v:'HROne', cat:'HR', val:190000, ren:'2026-09-26', type:'Auto-renew', notice:30, bought:53, active:41, yoy:8, owner:null, ownerNote:'Owner moved teams in February 2026' },
+  { id:'stripe-billing', v:'Stripe Billing', cat:'Payments', val:1800000, ren:'2026-09-26', type:'Manual', notice:30, bought:312, active:219, yoy:11, owner:null, ownerNote:'Inherited from the 2025 migration, never claimed' },
+  { id:'contentful', v:'Contentful', cat:'Marketing', val:4990000, ren:'2026-09-27', type:'Auto-renew', notice:30, bought:237, active:174, yoy:14, owner:null, ownerNote:'Reassignment pending since July 2026' },
+  { id:'zluri', v:'Zluri', cat:'IT', val:300000, ren:'2026-11-27', type:'Auto-renew', notice:90, bought:12, active:9, yoy:20, owner:null, ownerNote:'Inherited from the 2025 migration, never claimed' },
+  { id:'decentro', v:'Decentro', cat:'Payments', val:600000, ren:'2026-10-28', type:'Auto-renew', notice:60, bought:95, active:68, yoy:15, owner:null, ownerNote:'Owner moved teams in May 2026' },
+  { id:'springworks', v:'Springworks', cat:'HR', val:1600000, ren:'2026-11-28', type:'Auto-renew', notice:90, bought:320, active:254, yoy:7, owner:null, ownerNote:'Owner moved teams in May 2026' },
+  { id:'zimyo', v:'Zimyo', cat:'HR', val:250000, ren:'2026-10-15', type:'Auto-renew', notice:45, bought:6, active:5, yoy:10, owner:null, ownerNote:'Never assigned' },
+  { id:'adobe-creative-cloud', v:'Adobe Creative Cloud', cat:'Design', val:440000, ren:'2026-09-30', type:'Auto-renew', notice:30, bought:70, active:38, yoy:12, owner:null, ownerNote:'Never assigned' },
+  { id:'bharatpe-suite', v:'BharatPe Suite', cat:'Payments', val:17810000, ren:'2026-11-01', type:'Auto-renew', notice:60, bought:320, active:257, yoy:13, owner:null, ownerNote:'Never assigned' },
+  { id:'launchdarkly', v:'LaunchDarkly', cat:'Engineering', val:1160000, ren:'2026-11-01', type:'Manual', notice:60, bought:78, active:65, yoy:15, owner:null, ownerNote:'Reassignment pending since February 2026' },
+  { id:'gitlab-ultimate', v:'GitLab Ultimate', cat:'Engineering', val:1580000, ren:'2026-10-03', type:'Auto-renew', notice:30, bought:320, active:209, yoy:10, owner:null, ownerNote:'Anjali Deshmukh left in March 2026' },
+  { id:'confluent-cloud', v:'Confluent Cloud', cat:'Data', val:1420000, ren:'2026-10-03', type:'Auto-renew', notice:30, bought:69, active:47, yoy:8, owner:null, ownerNote:'Never assigned' },
+  { id:'framer', v:'Framer', cat:'Design', val:1940000, ren:'2026-12-04', type:'Auto-renew', notice:90, bought:212, active:109, yoy:15, owner:null, ownerNote:'Suresh Tripathi left in January 2026' },
+  { id:'hackerrank', v:'HackerRank', cat:'Recruiting', val:1650000, ren:'2026-10-21', type:'Auto-renew', notice:45, bought:220, active:91, yoy:10, owner:null, ownerNote:'Never assigned' },
+  { id:'sodexo-meal', v:'Sodexo Meal', cat:'HR', val:5810000, ren:'2026-10-06', type:'Auto-renew', notice:30, bought:169, active:137, yoy:10, owner:null, ownerNote:'Reassignment pending since June 2026' },
+  { id:'front', v:'Front', cat:'Support', val:1440000, ren:'2026-10-08', type:'Auto-renew', notice:30, bought:320, active:125, yoy:12, owner:null, ownerNote:'Never assigned' },
+  { id:'vanta', v:'Vanta', cat:'Compliance', val:1840000, ren:'2026-11-07', type:'Auto-renew', notice:60, bought:320, active:165, yoy:11, owner:null, ownerNote:'Owner moved teams in April 2026' },
+  { id:'sumhr', v:'SumHR', cat:'HR', val:5810000, ren:'2026-10-23', type:'Auto-renew', notice:45, bought:213, active:143, yoy:4, owner:null, ownerNote:'Owner moved teams in May 2026' },
+  { id:'gong', v:'Gong', cat:'Sales', val:6220000, ren:'2026-10-09', type:'Auto-renew', notice:30, bought:95, active:44, yoy:11, owner:null, ownerNote:'Never assigned' },
+  { id:'jio-cloud-voice', v:'Jio Cloud Voice', cat:'Communication', val:3830000, ren:'2026-11-08', type:'Auto-renew', notice:60, bought:113, active:95, yoy:15, owner:null, ownerNote:'Gopal Chauhan left in February 2026' },
+  { id:'innefu-shield', v:'Innefu Shield', cat:'Security', val:630000, ren:'2026-10-09', type:'Auto-renew', notice:30, bought:30, active:24, yoy:15, owner:null, ownerNote:'Hemant Acharya left in May 2026' },
+  { id:'asana', v:'Asana', cat:'Productivity', val:1860000, ren:'2026-10-09', type:'Auto-renew', notice:30, bought:320, active:287, yoy:17, owner:null, ownerNote:'Never assigned' },
+  { id:'myoperator', v:'MyOperator', cat:'Communication', val:1770000, ren:'2026-10-09', type:'Manual', notice:30, bought:154, active:129, yoy:10, owner:null, ownerNote:'Mrunal Tripathi left in March 2026' },
+  { id:'grammarly-business', v:'Grammarly Business', cat:'Productivity', val:1990000, ren:'2026-12-09', type:'Auto-renew', notice:90, bought:47, active:37, yoy:9, owner:null, ownerNote:'Never assigned' },
+  { id:'happyfox', v:'HappyFox', cat:'Support', val:100000, ren:'2026-12-10', type:'Auto-renew', notice:90, bought:30, active:24, yoy:9, owner:null, ownerNote:'Owner moved teams in February 2026' },
+  { id:'vwo', v:'VWO', cat:'Marketing', val:1210000, ren:'2026-10-14', type:'Manual', notice:30, bought:45, active:16, yoy:12, owner:null, ownerNote:'Never assigned' },
+  { id:'yotta-cloud', v:'Yotta Cloud', cat:'Infrastructure', val:340000, ren:'2026-10-14', type:'Auto-renew', notice:30, bought:27, active:23, yoy:8, owner:null, ownerNote:'Never assigned' },
+  { id:'1password-business', v:'1Password Business', cat:'Security', val:1360000, ren:'2026-10-14', type:'Auto-renew', notice:30, bought:279, active:210, yoy:15, owner:null, ownerNote:'Never assigned' },
+  { id:'rippling', v:'Rippling', cat:'HR', val:1100000, ren:'2026-10-19', type:'Auto-renew', notice:30, bought:53, active:37, yoy:12, owner:null, ownerNote:'Never assigned' },
+  { id:'mixpanel', v:'Mixpanel', cat:'Analytics', val:3920000, ren:'2026-12-24', type:'Auto-renew', notice:90, bought:320, active:226, yoy:13, owner:null, ownerNote:'Inherited from the 2025 migration, never claimed' },
+  { id:'juspay', v:'Juspay', cat:'Payments', val:430000, ren:'2026-10-25', type:'Auto-renew', notice:30, bought:41, active:24, yoy:11, owner:null, ownerNote:'Riya Tripathi left in February 2026' },
+  { id:'payu-india', v:'PayU India', cat:'Payments', val:1370000, ren:'2026-12-25', type:'Auto-renew', notice:90, bought:251, active:155, yoy:13, owner:null, ownerNote:'Never assigned' },
+  { id:'busy-accounting', v:'Busy Accounting', cat:'Finance', val:1080000, ren:'2026-12-26', type:'Auto-renew', notice:90, bought:200, active:145, yoy:8, owner:null, ownerNote:'Inherited from the 2025 migration, never claimed' },
+  { id:'quick-heal-enterprise', v:'Quick Heal Enterprise', cat:'Security', val:6790000, ren:'2026-11-26', type:'Auto-renew', notice:60, bought:162, active:78, yoy:2, owner:null, ownerNote:'Never assigned' },
+  { id:'redis-cloud', v:'Redis Cloud', cat:'Infrastructure', val:1570000, ren:'2026-12-27', type:'Auto-renew', notice:90, bought:320, active:278, yoy:2, owner:null, ownerNote:'Reassignment pending since June 2026' },
+  { id:'zoho-crm', v:'Zoho CRM', cat:'Sales', val:950000, ren:'2026-10-28', type:'Auto-renew', notice:30, bought:133, active:104, yoy:8, owner:null, ownerNote:'Inherited from the 2025 migration, never claimed' },
+  { id:'algolia', v:'Algolia', cat:'Engineering', val:170000, ren:'2026-11-27', type:'Auto-renew', notice:60, bought:32, active:21, yoy:21, owner:null, ownerNote:'Nandini Kamat left in February 2026' },
+  { id:'sketch', v:'Sketch', cat:'Design', val:310000, ren:'2026-10-29', type:'Auto-renew', notice:30, bought:8, active:4, yoy:8, owner:null, ownerNote:'Reassignment pending since February 2026' },
+  { id:'monday-com', v:'Monday.com', cat:'Productivity', val:680000, ren:'2026-11-30', type:'Auto-renew', notice:60, bought:109, active:87, yoy:15, owner:null, ownerNote:'Reassignment pending since May 2026' },
+  { id:'hubspot', v:'HubSpot', cat:'Marketing', val:220000, ren:'2026-12-02', type:'Auto-renew', notice:60, bought:21, active:12, yoy:3, owner:null, ownerNote:'Vinay Kulkarni left in February 2026' },
+  { id:'drata', v:'Drata', cat:'Compliance', val:1610000, ren:'2026-12-02', type:'Auto-renew', notice:60, bought:53, active:49, yoy:8, owner:null, ownerNote:'Mrunal Tripathi left in March 2026' },
+  { id:'lambdatest', v:'LambdaTest', cat:'Engineering', val:2260000, ren:'2027-01-02', type:'Manual', notice:90, bought:273, active:162, yoy:5, owner:null, ownerNote:'Vinay Kulkarni left in July 2026' },
+  { id:'retool', v:'Retool', cat:'Engineering', val:85000, ren:'2026-11-04', type:'Auto-renew', notice:30, bought:18, active:16, yoy:8, owner:null, ownerNote:'Reassignment pending since June 2026' },
+  { id:'imocha', v:'iMocha', cat:'Recruiting', val:1250000, ren:'2027-01-05', type:'Auto-renew', notice:90, bought:43, active:20, yoy:16, owner:null, ownerNote:'Owner moved teams in July 2026' },
+  { id:'guru', v:'Guru', cat:'Productivity', val:2360000, ren:'2026-11-06', type:'Auto-renew', notice:30, bought:62, active:47, yoy:16, owner:null, ownerNote:'Never assigned' },
+  { id:'pluxee-benefits', v:'Pluxee Benefits', cat:'HR', val:2000000, ren:'2026-12-09', type:'Auto-renew', notice:60, bought:224, active:133, yoy:3, owner:null, ownerNote:'Inherited from the 2025 migration, never claimed' },
+  { id:'amagi-cloud', v:'Amagi Cloud', cat:'Infrastructure', val:920000, ren:'2027-01-08', type:'Auto-renew', notice:90, bought:21, active:13, yoy:16, owner:null, ownerNote:'Owner moved teams in February 2026' },
+  { id:'jumpcloud', v:'JumpCloud', cat:'IT', val:7880000, ren:'2026-12-12', type:'Auto-renew', notice:60, bought:320, active:279, yoy:8, owner:null, ownerNote:'Reassignment pending since June 2026' },
+  { id:'calendly', v:'Calendly', cat:'Productivity', val:6100000, ren:'2027-01-12', type:'Auto-renew', notice:90, bought:320, active:131, yoy:16, owner:null, ownerNote:'Hemant Patil left in March 2026' },
+  { id:'deel', v:'Deel', cat:'HR', val:1360000, ren:'2026-11-17', type:'Manual', notice:30, bought:40, active:21, yoy:12, owner:null, ownerNote:'Owner moved teams in July 2026' },
+  { id:'netmagic-hosting', v:'Netmagic Hosting', cat:'Infrastructure', val:110000, ren:'2026-11-16', type:'Auto-renew', notice:90, bought:8, active:3, yoy:2, owner:'Tarun Khanna' },
+  { id:'freshsales', v:'Freshsales', cat:'Sales', val:1750000, ren:'2026-11-16', type:'Auto-renew', notice:90, bought:53, active:46, yoy:9, owner:'Sourabh Jayshankar' },
+  { id:'sentinelone', v:'SentinelOne', cat:'Security', val:1370000, ren:'2026-09-17', type:'Auto-renew', notice:30, bought:234, active:215, yoy:19, owner:'Lakshmi More' },
+  { id:'paytm-business', v:'Paytm Business', cat:'Payments', val:8570000, ren:'2026-09-17', type:'Auto-renew', notice:30, bought:320, active:168, yoy:8, owner:'Manisha Vora' },
+  { id:'snyk', v:'Snyk', cat:'Security', val:4940000, ren:'2026-10-17', type:'Auto-renew', notice:60, bought:320, active:155, yoy:12, owner:'kartik Kadam' },
+  { id:'segment', v:'Segment', cat:'Data', val:200000, ren:'2026-10-03', type:'Auto-renew', notice:45, bought:44, active:35, yoy:7, owner:'Rahul Shinde' },
+  { id:'phonepe-business', v:'PhonePe Business', cat:'Payments', val:1540000, ren:'2026-11-17', type:'Auto-renew', notice:90, bought:122, active:47, yoy:5, owner:'Rohan Iyer' },
+  { id:'power-bi', v:'Power BI', cat:'Analytics', val:320000, ren:'2026-10-03', type:'Auto-renew', notice:45, bought:44, active:25, yoy:9, owner:'Manisha Vora' },
+  { id:'postman', v:'Postman', cat:'Engineering', val:2130000, ren:'2026-10-18', type:'Auto-renew', notice:60, bought:137, active:56, yoy:8, owner:'Sarika Reddy' },
+  { id:'miro-enterprise', v:'Miro Enterprise', cat:'Design', val:800000, ren:'2026-09-18', type:'Manual', notice:30, bought:134, active:107, yoy:19, owner:'Sarika Reddy' },
+  { id:'jify-payroll', v:'Jify Payroll', cat:'HR', val:1570000, ren:'2026-11-17', type:'Auto-renew', notice:90, bought:250, active:209, yoy:8, owner:'Aparna Pandey' },
+  { id:'metabase', v:'Metabase', cat:'Analytics', val:660000, ren:'2026-10-19', type:'Auto-renew', notice:60, bought:100, active:46, yoy:2, owner:'Sarika Pawar' },
+  { id:'skuad-global', v:'Skuad Global', cat:'HR', val:450000, ren:'2026-10-19', type:'Manual', notice:60, bought:123, active:39, yoy:21, owner:'Rutwik Saha' },
+  { id:'indusface-waf', v:'Indusface WAF', cat:'Security', val:390000, ren:'2026-09-19', type:'Auto-renew', notice:30, bought:12, active:9, yoy:13, owner:'Indrani Saha' },
+  { id:'expensify', v:'Expensify', cat:'Finance', val:4110000, ren:'2026-10-19', type:'Auto-renew', notice:60, bought:320, active:75, yoy:11, owner:'Gayatri Gupta' },
+  { id:'braze', v:'Braze', cat:'Marketing', val:2850000, ren:'2026-10-19', type:'Auto-renew', notice:60, bought:320, active:193, yoy:9, owner:'Rohan Iyer' },
+  { id:'grafana-cloud', v:'Grafana Cloud', cat:'Observability', val:1830000, ren:'2026-10-19', type:'Auto-renew', notice:60, bought:41, active:17, yoy:10, owner:'Kabir Sethi' },
+  { id:'lucid', v:'Lucidchart', cat:'Productivity', val:1068000, ren:'2026-09-20', type:'Auto-renew', notice:30, bought:180, active:41, yoy:9, owner:'kartik Kadam' },
+  { id:'signzy', v:'Signzy', cat:'Compliance', val:3040000, ren:'2026-10-05', type:'Auto-renew', notice:45, bought:209, active:147, yoy:8, owner:'Rahul Bora' },
+  { id:'google-workspace', v:'Google Workspace', cat:'Productivity', val:1580000, ren:'2026-10-20', type:'Auto-renew', notice:60, bought:59, active:45, yoy:14, owner:'Sameer Ranganathan' },
+  { id:'tranzact', v:'TranZact', cat:'Finance', val:260000, ren:'2026-10-20', type:'Manual', notice:60, bought:10, active:7, yoy:9, owner:'Kabir Sethi' },
+  { id:'hex', v:'Hex', cat:'Analytics', val:4530000, ren:'2026-11-19', type:'Auto-renew', notice:90, bought:320, active:206, yoy:8, owner:'Sourabh Jayshankar' },
+  { id:'hasura', v:'Hasura', cat:'Engineering', val:1940000, ren:'2026-10-20', type:'Manual', notice:60, bought:105, active:67, yoy:10, owner:'Darshan Nair' },
+  { id:'zoho-vault', v:'Zoho Vault', cat:'Security', val:10030000, ren:'2026-10-05', type:'Auto-renew', notice:45, bought:320, active:193, yoy:12, owner:'Riya Kamat' },
+  { id:'lattice', v:'Lattice', cat:'HR', val:250000, ren:'2026-10-06', type:'Auto-renew', notice:45, bought:32, active:24, yoy:22, owner:'Manisha Vora' },
+  { id:'kredily', v:'Kredily', cat:'HR', val:1850000, ren:'2026-10-06', type:'Auto-renew', notice:45, bought:320, active:217, yoy:9, owner:'Rutwik Saha' },
+  { id:'linear', v:'Linear', cat:'Engineering', val:2740000, ren:'2026-11-20', type:'Auto-renew', notice:90, bought:134, active:63, yoy:4, owner:'Sourabh Jayshankar' },
+  { id:'okta', v:'Okta', cat:'Security', val:23250000, ren:'2026-10-21', type:'Auto-renew', notice:60, bought:320, active:237, yoy:5, owner:'Aarav Kadam' },
+  { id:'culture-amp', v:'Culture Amp', cat:'HR', val:17180000, ren:'2026-09-21', type:'Manual', notice:30, bought:320, active:125, yoy:19, owner:'Varun Nimbalkar' },
+  { id:'wingify-engage', v:'Wingify Engage', cat:'Marketing', val:6190000, ren:'2026-10-22', type:'Auto-renew', notice:60, bought:320, active:245, yoy:15, owner:'Manisha Vora' },
+  { id:'new-relic', v:'New Relic', cat:'Observability', val:6760000, ren:'2026-11-21', type:'Auto-renew', notice:90, bought:275, active:166, yoy:0, owner:'Bhushan Ghosh' },
+  { id:'leegality', v:'Leegality', cat:'Legal', val:55000, ren:'2026-11-21', type:'Auto-renew', notice:90, bought:17, active:8, yoy:8, owner:'Sarika Pawar' },
+  { id:'zohobooks', v:'Zoho Books', cat:'Finance', val:620000, ren:'2026-09-23', type:'Auto-renew', notice:30, bought:60, active:38, yoy:6, owner:'Rutwik Saha' },
+  { id:'refrens', v:'Refrens', cat:'Finance', val:16000000, ren:'2026-09-23', type:'Auto-renew', notice:30, bought:320, active:275, yoy:12, owner:'Sujata Sardesai' },
+  { id:'sentry', v:'Sentry', cat:'Engineering', val:210000, ren:'2026-09-23', type:'Auto-renew', notice:30, bought:70, active:45, yoy:11, owner:'Jasleen Reddy' },
+  { id:'atlassian-access', v:'Atlassian Access', cat:'Security', val:290000, ren:'2026-10-08', type:'Auto-renew', notice:45, bought:33, active:20, yoy:8, owner:'Vinay Phadke' },
+  { id:'scrut-automation', v:'Scrut Automation', cat:'Compliance', val:4630000, ren:'2026-11-22', type:'Auto-renew', notice:90, bought:320, active:156, yoy:1, owner:'Ramya Bora' },
+  { id:'testbook-enterprise', v:'Testbook Enterprise', cat:'HR', val:690000, ren:'2026-09-23', type:'Auto-renew', notice:30, bought:21, active:19, yoy:9, owner:'Neha Chauhan' },
+  { id:'secureframe', v:'Secureframe', cat:'Compliance', val:26890000, ren:'2026-10-09', type:'Auto-renew', notice:45, bought:320, active:232, yoy:4, owner:'Sourabh Jayshankar' },
+  { id:'ironclad', v:'Ironclad', cat:'Legal', val:15790000, ren:'2026-10-24', type:'Auto-renew', notice:60, bought:320, active:211, yoy:5, owner:'Tarun Khanna' },
+  { id:'volopay', v:'Volopay', cat:'Finance', val:1250000, ren:'2026-10-24', type:'Auto-renew', notice:60, bought:280, active:253, yoy:12, owner:'Sarika Reddy' },
+  { id:'tallyprime', v:'TallyPrime', cat:'Finance', val:3570000, ren:'2026-09-24', type:'Auto-renew', notice:30, bought:320, active:258, yoy:22, owner:'Sameer Ranganathan' },
+  { id:'microsoft-365', v:'Microsoft 365', cat:'Productivity', val:480000, ren:'2026-10-09', type:'Auto-renew', notice:45, bought:65, active:45, yoy:23, owner:'Pranav Pillai' },
+  { id:'jamf-pro', v:'Jamf Pro', cat:'IT', val:1950000, ren:'2026-09-25', type:'Manual', notice:30, bought:320, active:161, yoy:8, owner:'Aparna Pandey' },
+  { id:'icertis', v:'Icertis', cat:'Legal', val:260000, ren:'2026-09-25', type:'Auto-renew', notice:30, bought:57, active:45, yoy:0, owner:'Sarika Pawar' },
+  { id:'loom', v:'Loom', cat:'Communication', val:1290000, ren:'2026-09-25', type:'Auto-renew', notice:30, bought:153, active:51, yoy:12, owner:'Trupti Karnik' },
+  { id:'karza', v:'Karza', cat:'Compliance', val:90000, ren:'2026-09-25', type:'Auto-renew', notice:30, bought:23, active:13, yoy:17, owner:'Pranav Pillai' },
+  { id:'airtable', v:'Airtable', cat:'Productivity', val:320000, ren:'2026-10-26', type:'Auto-renew', notice:60, bought:12, active:5, yoy:14, owner:'Kavya Kamat' },
+  { id:'apollo-io', v:'Apollo.io', cat:'Sales', val:4030000, ren:'2026-09-26', type:'Auto-renew', notice:30, bought:113, active:62, yoy:10, owner:'Harshita Kamat' },
+  { id:'keka-hr', v:'Keka HR', cat:'HR', val:980000, ren:'2026-10-11', type:'Manual', notice:45, bought:42, active:31, yoy:6, owner:'Nisha Kaur' },
+  { id:'gupshup', v:'Gupshup', cat:'Communication', val:6720000, ren:'2026-11-25', type:'Auto-renew', notice:90, bought:320, active:239, yoy:6, owner:'Rutwik Saha' },
+  { id:'jira-software', v:'Jira Software', cat:'Engineering', val:1220000, ren:'2026-11-25', type:'Auto-renew', notice:90, bought:111, active:33, yoy:22, owner:'Pranav Pillai' },
+  { id:'razorpay', v:'Razorpay', cat:'Payments', val:2365000, ren:'2026-11-26', type:'Auto-renew', notice:90, bought:50, active:45, yoy:9, owner:'Ananya Deshpande' },
+  { id:'docusign', v:'DocuSign', cat:'Legal', val:45000, ren:'2026-10-12', type:'Auto-renew', notice:45, bought:3, active:2, yoy:11, owner:'Omkar Marathe' },
+  { id:'freshchat', v:'Freshchat', cat:'Support', val:1490000, ren:'2026-09-27', type:'Auto-renew', notice:30, bought:73, active:35, yoy:9, owner:'Kabir Sethi' },
+  { id:'zoho-people', v:'Zoho People', cat:'HR', val:6840000, ren:'2026-09-27', type:'Auto-renew', notice:30, bought:320, active:223, yoy:8, owner:'Lalit S' },
+  { id:'ramp', v:'Ramp', cat:'Finance', val:650000, ren:'2026-11-26', type:'Auto-renew', notice:90, bought:122, active:72, yoy:0, owner:'Gaurav Rathore' },
+  { id:'box', v:'Box', cat:'Productivity', val:1710000, ren:'2026-09-27', type:'Auto-renew', notice:30, bought:320, active:145, yoy:6, owner:'Varun Nimbalkar' },
+  { id:'e2e-networks', v:'E2E Networks', cat:'Infrastructure', val:4060000, ren:'2026-09-27', type:'Manual', notice:30, bought:169, active:149, yoy:4, owner:'Sourabh Jayshankar' },
+  { id:'twilio', v:'Twilio', cat:'Communication', val:4365000, ren:'2026-09-28', type:'Auto-renew', notice:30, bought:45, active:31, yoy:14, owner:'kartik Kadam' },
+  { id:'intercom', v:'Intercom', cat:'Support', val:770000, ren:'2026-09-28', type:'Manual', notice:30, bought:64, active:46, yoy:4, owner:'Manisha Vora' },
+  { id:'circleci', v:'CircleCI', cat:'DevOps', val:1520000, ren:'2026-09-28', type:'Auto-renew', notice:30, bought:66, active:50, yoy:14, owner:'Aparna Pandey' },
+  { id:'zoho-workerly', v:'Zoho Workerly', cat:'HR', val:3880000, ren:'2026-09-28', type:'Auto-renew', notice:30, bought:320, active:156, yoy:11, owner:'Nandini Kulkarni' },
+  { id:'jfrog-artifactory', v:'JFrog Artifactory', cat:'DevOps', val:3660000, ren:'2026-09-29', type:'Auto-renew', notice:30, bought:320, active:226, yoy:0, owner:'Trupti Karnik' },
+  { id:'netcore-cloud', v:'Netcore Cloud', cat:'Marketing', val:1100000, ren:'2026-11-28', type:'Auto-renew', notice:90, bought:48, active:41, yoy:12, owner:'Jasleen Reddy' },
+  { id:'crowdstrike', v:'CrowdStrike', cat:'Security', val:13080000, ren:'2026-11-28', type:'Auto-renew', notice:90, bought:320, active:246, yoy:10, owner:'Meera Raghavan' },
+  { id:'zoho-salesiq', v:'Zoho SalesIQ', cat:'Marketing', val:2270000, ren:'2026-09-30', type:'Manual', notice:30, bought:83, active:70, yoy:14, owner:'Nisha Dhillon' },
+  { id:'open-money', v:'Open Money', cat:'Finance', val:70000, ren:'2026-11-29', type:'Auto-renew', notice:90, bought:4, active:3, yoy:3, owner:'Sneha Singh' },
+  { id:'kaleyra', v:'Kaleyra', cat:'Communication', val:1460000, ren:'2026-10-30', type:'Auto-renew', notice:60, bought:117, active:85, yoy:7, owner:'Aisha Singh' },
+  { id:'outreach', v:'Outreach', cat:'Sales', val:1330000, ren:'2026-09-30', type:'Auto-renew', notice:30, bought:269, active:116, yoy:17, owner:'Ananya Deshpande' },
+  { id:'zoho-flow', v:'Zoho Flow', cat:'Productivity', val:2170000, ren:'2026-10-15', type:'Auto-renew', notice:45, bought:198, active:122, yoy:9, owner:'Aarav Kadam' },
+  { id:'cloudflare-enterprise', v:'Cloudflare Enterprise', cat:'Infrastructure', val:910000, ren:'2026-09-30', type:'Auto-renew', notice:30, bought:80, active:48, yoy:18, owner:'Darshan Nair' },
+  { id:'databricks', v:'Databricks', cat:'Data', val:50000, ren:'2026-09-30', type:'Auto-renew', notice:30, bought:3, active:2, yoy:17, owner:'Jayant Mukherjee' },
+  { id:'cledara', v:'Cledara', cat:'IT', val:1130000, ren:'2026-11-29', type:'Auto-renew', notice:90, bought:134, active:81, yoy:8, owner:'Ananya Bhat' },
+  { id:'zoom', v:'Zoom', cat:'Communication', val:2605000, ren:'2026-10-01', type:'Auto-renew', notice:30, bought:300, active:288, yoy:3, owner:'kartik Kadam' },
+  { id:'fyle-expenses', v:'Fyle Expenses', cat:'Finance', val:1450000, ren:'2026-10-16', type:'Auto-renew', notice:45, bought:275, active:203, yoy:15, owner:'Gaurav Rathore' },
+  { id:'clari', v:'Clari', cat:'Sales', val:380000, ren:'2026-10-31', type:'Manual', notice:60, bought:72, active:54, yoy:12, owner:'Aarav Kadam' },
+  { id:'freshworks-crm', v:'Freshworks CRM', cat:'Sales', val:2190000, ren:'2026-10-17', type:'Auto-renew', notice:45, bought:183, active:146, yoy:6, owner:'Ananya Bhat' },
+  { id:'astra-security', v:'Astra Security', cat:'Security', val:10390000, ren:'2026-10-02', type:'Auto-renew', notice:30, bought:320, active:123, yoy:17, owner:'Sourabh More' },
+  { id:'hotjar', v:'Hotjar', cat:'Analytics', val:1250000, ren:'2026-10-02', type:'Manual', notice:30, bought:264, active:193, yoy:10, owner:'Aparna Pandey' },
+  { id:'zoominfo', v:'ZoomInfo', cat:'Sales', val:770000, ren:'2026-12-02', type:'Auto-renew', notice:90, bought:243, active:138, yoy:3, owner:'Nandini Salunkhe' },
+  { id:'make', v:'Make', cat:'Productivity', val:13560000, ren:'2026-12-02', type:'Auto-renew', notice:90, bought:320, active:251, yoy:6, owner:'Sourabh Jayshankar' },
+  { id:'hackerearth', v:'HackerEarth', cat:'Recruiting', val:4920000, ren:'2026-10-03', type:'Auto-renew', notice:30, bought:234, active:190, yoy:9, owner:'Varun Nimbalkar' },
+  { id:'qandle', v:'Qandle', cat:'HR', val:110000, ren:'2026-10-03', type:'Manual', notice:30, bought:13, active:9, yoy:5, owner:'Omkar Marathe' },
+  { id:'superhuman', v:'Superhuman', cat:'Communication', val:5710000, ren:'2026-12-02', type:'Auto-renew', notice:90, bought:320, active:264, yoy:10, owner:'Trupti Karnik' },
+  { id:'clevertap', v:'CleverTap', cat:'Marketing', val:630000, ren:'2026-10-03', type:'Manual', notice:30, bought:102, active:84, yoy:22, owner:'Aniket Bhat' },
+  { id:'lucideus-safe', v:'Lucideus Safe', cat:'Security', val:1220000, ren:'2026-11-02', type:'Auto-renew', notice:60, bought:175, active:113, yoy:12, owner:'Sneha Singh' },
+  { id:'iterable', v:'Iterable', cat:'Marketing', val:1060000, ren:'2026-12-02', type:'Auto-renew', notice:90, bought:129, active:65, yoy:6, owner:'Riya Kamat' },
+  { id:'whatfix', v:'Whatfix', cat:'Productivity', val:1710000, ren:'2026-10-03', type:'Manual', notice:30, bought:118, active:87, yoy:11, owner:'Komal Reddy' },
+  { id:'freshworks', v:'Freshworks', cat:'Support', val:3480000, ren:'2026-12-03', type:'Auto-renew', notice:90, bought:150, active:96, yoy:12, owner:'Lalit S' },
+  { id:'auth0', v:'Auth0', cat:'Security', val:6290000, ren:'2026-10-04', type:'Manual', notice:30, bought:320, active:160, yoy:14, owner:'Zoya Das' },
+  { id:'chatwoot', v:'Chatwoot', cat:'Support', val:390000, ren:'2026-10-19', type:'Auto-renew', notice:45, bought:34, active:9, yoy:17, owner:'Madhav Saha' },
+  { id:'confluence', v:'Confluence', cat:'Productivity', val:1840000, ren:'2026-11-03', type:'Auto-renew', notice:60, bought:138, active:101, yoy:7, owner:'Komal Reddy' },
+  { id:'notion', v:'Notion', cat:'Productivity', val:300000, ren:'2026-10-04', type:'Auto-renew', notice:30, bought:93, active:83, yoy:18, owner:'Kaushik Wagle' },
+  { id:'looker', v:'Looker', cat:'Analytics', val:250000, ren:'2026-10-04', type:'Auto-renew', notice:30, bought:9, active:8, yoy:11, owner:'Zoya Das' },
+  { id:'browserstack', v:'BrowserStack', cat:'Engineering', val:4210000, ren:'2026-11-03', type:'Auto-renew', notice:60, bought:247, active:91, yoy:11, owner:'Sneha Singh' },
+  { id:'nuvei-india', v:'Nuvei India', cat:'Payments', val:290000, ren:'2026-11-03', type:'Auto-renew', notice:60, bought:12, active:5, yoy:8, owner:'Komal Reddy' },
+  { id:'statsig', v:'Statsig', cat:'Engineering', val:6620000, ren:'2026-10-19', type:'Auto-renew', notice:45, bought:320, active:247, yoy:8, owner:'Nisha Dhillon' },
+  { id:'atlan', v:'Atlan', cat:'Data', val:3540000, ren:'2026-10-19', type:'Auto-renew', notice:45, bought:210, active:100, yoy:6, owner:'Darshan Nair' },
+  { id:'netlify', v:'Netlify', cat:'Engineering', val:230000, ren:'2026-12-03', type:'Auto-renew', notice:90, bought:55, active:48, yoy:17, owner:'Riya Kamat' },
+  { id:'airtel-iq', v:'Airtel IQ', cat:'Communication', val:1910000, ren:'2026-10-05', type:'Auto-renew', notice:30, bought:169, active:129, yoy:13, owner:'Jayant Mukherjee' },
+  { id:'razorpayx', v:'RazorpayX', cat:'Finance', val:15030000, ren:'2026-10-20', type:'Auto-renew', notice:45, bought:320, active:275, yoy:10, owner:'Sourabh Jayshankar' },
+  { id:'sirionlabs', v:'SirionLabs', cat:'Legal', val:13780000, ren:'2026-10-05', type:'Auto-renew', notice:30, bought:320, active:243, yoy:19, owner:'Manisha Vora' },
+  { id:'pendo', v:'Pendo', cat:'Analytics', val:1680000, ren:'2026-10-05', type:'Auto-renew', notice:30, bought:69, active:53, yoy:15, owner:'Jayant Mukherjee' },
+  { id:'cleartax', v:'ClearTax', cat:'Finance', val:1370000, ren:'2026-10-20', type:'Auto-renew', notice:45, bought:131, active:88, yoy:8, owner:'Yamini Salunkhe' },
+  { id:'zoho-projects', v:'Zoho Projects', cat:'Productivity', val:5940000, ren:'2026-10-20', type:'Auto-renew', notice:45, bought:320, active:227, yoy:9, owner:'Nisha Dhillon' },
+  { id:'tata-comms-cpaas', v:'Tata Comms CPaaS', cat:'Communication', val:5770000, ren:'2026-10-05', type:'Auto-renew', notice:30, bought:178, active:146, yoy:6, owner:'Pooja Bora' },
+  { id:'kapture-cx', v:'Kapture CX', cat:'Support', val:590000, ren:'2026-10-05', type:'Auto-renew', notice:30, bought:25, active:20, yoy:18, owner:'Neha Tripathi' },
+  { id:'hightouch', v:'Hightouch', cat:'Data', val:2740000, ren:'2026-10-06', type:'Auto-renew', notice:30, bought:155, active:77, yoy:13, owner:'Indrani Saha' },
+  { id:'zapier', v:'Zapier', cat:'Productivity', val:680000, ren:'2026-10-21', type:'Auto-renew', notice:45, bought:104, active:90, yoy:14, owner:'Sarika Pawar' },
+  { id:'greenhouse', v:'Greenhouse', cat:'Recruiting', val:6130000, ren:'2026-11-05', type:'Auto-renew', notice:60, bought:320, active:304, yoy:7, owner:'Jyoti Krishnan' },
+  { id:'netsuite', v:'NetSuite', cat:'Finance', val:13990000, ren:'2026-11-05', type:'Auto-renew', notice:60, bought:320, active:166, yoy:13, owner:'Gaurav Rathore' },
+  { id:'optimizely', v:'Optimizely', cat:'Marketing', val:530000, ren:'2026-11-05', type:'Auto-renew', notice:60, bought:33, active:16, yoy:9, owner:'Darshan Nair' },
+  { id:'esds-cloud', v:'ESDS Cloud', cat:'Infrastructure', val:270000, ren:'2026-10-06', type:'Auto-renew', notice:30, bought:79, active:56, yoy:13, owner:'Nisha Kaur' },
+  { id:'elastic-cloud', v:'Elastic Cloud', cat:'Infrastructure', val:100000, ren:'2026-10-06', type:'Auto-renew', notice:30, bought:16, active:10, yoy:17, owner:'Priya JP' },
+  { id:'atlassian', v:'Atlassian', cat:'Engineering', val:4915000, ren:'2026-10-07', type:'Manual', notice:30, bought:200, active:190, yoy:7, owner:'Meera Raghavan' },
+  { id:'khatabook-pro', v:'Khatabook Pro', cat:'Finance', val:25220000, ren:'2026-10-22', type:'Auto-renew', notice:45, bought:320, active:230, yoy:11, owner:'Pooja Bora' },
+  { id:'knowlarity', v:'Knowlarity', cat:'Communication', val:1880000, ren:'2026-12-06', type:'Auto-renew', notice:90, bought:320, active:159, yoy:12, owner:'Rohan Iyer' },
+  { id:'zoho-desk', v:'Zoho Desk', cat:'Support', val:6200000, ren:'2026-11-06', type:'Auto-renew', notice:60, bought:320, active:238, yoy:12, owner:'Priya JP' },
+  { id:'tableau', v:'Tableau', cat:'Analytics', val:210000, ren:'2026-10-07', type:'Auto-renew', notice:30, bought:22, active:18, yoy:16, owner:'Aisha Singh' },
+  { id:'webflow', v:'Webflow', cat:'Marketing', val:6440000, ren:'2026-11-06', type:'Auto-renew', notice:60, bought:199, active:93, yoy:19, owner:'Aniket Bhat' },
+  { id:'torii', v:'Torii', cat:'IT', val:880000, ren:'2026-11-07', type:'Auto-renew', notice:60, bought:34, active:24, yoy:8, owner:'Neha Tripathi' },
+  { id:'vahan-hiring', v:'Vahan Hiring', cat:'Recruiting', val:1160000, ren:'2026-10-09', type:'Auto-renew', notice:30, bought:28, active:17, yoy:8, owner:'Neha Chauhan' },
+  { id:'docker-business', v:'Docker Business', cat:'DevOps', val:4690000, ren:'2026-12-08', type:'Auto-renew', notice:90, bought:320, active:245, yoy:0, owner:'Trupti Karnik' },
+  { id:'nium-payouts', v:'Nium Payouts', cat:'Payments', val:390000, ren:'2026-10-09', type:'Auto-renew', notice:30, bought:22, active:20, yoy:14, owner:'Darshan Nair' },
+  { id:'pocket-hrms', v:'Pocket HRMS', cat:'HR', val:5100000, ren:'2026-09-24', type:'Auto-renew', notice:60, bought:320, active:214, yoy:4, owner:'Riya Kamat', decision:{d:'Renewed', on:'2026-07-25', by:'Aniket Bhat'} },
+  { id:'okcredit-pro', v:'OkCredit Pro', cat:'Finance', val:270000, ren:'2026-09-29', type:'Auto-renew', notice:60, bought:8, active:6, yoy:15, owner:'Meera Raghavan', decision:{d:'Cancelled', on:'2026-08-07', by:'Kaushik Wagle'} },
+  { id:'cashfree', v:'Cashfree', cat:'Payments', val:290000, ren:'2026-09-01', type:'Auto-renew', notice:30, bought:59, active:48, yoy:8, owner:'Priya Nair', decision:{d:'Cancelled', on:'2026-07-23', by:'Vinay Phadke'} },
+  { id:'clickup', v:'ClickUp', cat:'Productivity', val:310000, ren:'2026-10-01', type:'Auto-renew', notice:60, bought:11, active:3, yoy:19, owner:'Sameer Ranganathan', decision:{d:'Renewed', on:'2026-08-05', by:'Siddharth Bora'} },
+  { id:'vercel', v:'Vercel', cat:'Engineering', val:320000, ren:'2026-09-03', type:'Auto-renew', notice:30, bought:14, active:6, yoy:21, owner:'Sneha Singh', decision:{d:'Cancelled', on:'2026-08-07', by:'Aniket Bhat'} },
+  { id:'vyapar', v:'Vyapar', cat:'Finance', val:320000, ren:'2026-09-03', type:'Manual', notice:30, bought:35, active:20, yoy:7, owner:'Kaushik Wagle', decision:{d:'Cancelled', on:'2026-07-28', by:'Jasleen Reddy'} },
+  { id:'digio', v:'Digio', cat:'Legal', val:3920000, ren:'2026-09-08', type:'Auto-renew', notice:30, bought:182, active:127, yoy:15, owner:'Kabir Sethi', decision:{d:'Cancelled', on:'2026-07-31', by:'Manav Shetty'} },
+  { id:'moengage', v:'MoEngage', cat:'Marketing', val:350000, ren:'2026-09-23', type:'Auto-renew', notice:45, bought:99, active:68, yoy:11, owner:'Jayant Mukherjee', decision:{d:'Cancelled', on:'2026-07-21', by:'Manav Shetty'} },
+  { id:'coupa', v:'Coupa', cat:'Finance', val:370000, ren:'2026-09-12', type:'Auto-renew', notice:30, bought:35, active:15, yoy:11, owner:'Jatin Saha', decision:{d:'Renewed', on:'2026-07-19', by:'Rahul Shinde'} },
+  { id:'zoho-recruit', v:'Zoho Recruit', cat:'Recruiting', val:450000, ren:'2026-10-12', type:'Auto-renew', notice:60, bought:143, active:112, yoy:6, owner:'Sarika Reddy', decision:{d:'Renewed', on:'2026-08-03', by:'Jayant Mukherjee'} },
+  { id:'dropbox-business', v:'Dropbox Business', cat:'Productivity', val:390000, ren:'2026-09-14', type:'Auto-renew', notice:30, bought:67, active:48, yoy:5, owner:'Vikram Krishnan', decision:{d:'Renewed', on:'2026-07-15', by:'Ramya Gupta'} },
+  { id:'zendesk', v:'Zendesk', cat:'Support', val:6330000, ren:'2026-10-15', type:'Auto-renew', notice:60, bought:320, active:276, yoy:3, owner:'Pranav Pillai', decision:{d:'Renewed', on:'2026-08-10', by:'Jasleen Reddy'} },
+  { id:'uniqus-advisory', v:'Uniqus Advisory', cat:'Compliance', val:3590000, ren:'2026-09-17', type:'Auto-renew', notice:30, bought:320, active:188, yoy:10, owner:'Manisha Vora', decision:{d:'Cancelled', on:'2026-07-27', by:'Priya Nair'} },
+  { id:'zeta-optima', v:'Zeta Optima', cat:'HR', val:3530000, ren:'2026-09-18', type:'Auto-renew', notice:30, bought:131, active:108, yoy:24, owner:'kartik Kadam', decision:{d:'Renewed', on:'2026-07-28', by:'Sneha Singh'} },
+  { id:'sprinto', v:'Sprinto', cat:'Compliance', val:350000, ren:'2026-09-28', type:'Auto-renew', notice:30, bought:37, active:25, yoy:14, owner:'Ananya Deshpande', decision:{d:'Renewed', on:'2026-08-09', by:'Neha Tripathi'} },
+  { id:'slack', v:'Slack', cat:'Communication', val:3422000, ren:'2026-10-31', type:'Auto-renew', notice:60, bought:320, active:313, yoy:8, owner:'Sourabh Jayshankar', decision:{d:'Cancelled', on:'2026-08-03', by:'Priya Nair'} },
+  { id:'jira-service-management', v:'Jira Service Management', cat:'IT', val:210000, ren:'2026-12-03', type:'Manual', notice:90, bought:24, active:12, yoy:4, owner:'Riya Kamat', decision:{d:'Cancelled', on:'2026-07-18', by:'Komal Reddy'} },
+  { id:'sprinklr-insights', v:'Sprinklr Insights', cat:'Marketing', val:240000, ren:'2026-12-08', type:'Auto-renew', notice:90, bought:35, active:34, yoy:18, owner:'Sourabh More', decision:{d:'Renewed', on:'2026-07-21', by:'Jatin Saha'} },
+  { id:'salesforce', v:'Salesforce', cat:'CRM', val:15025000, ren:'2026-11-13', type:'Auto-renew', notice:60, bought:300, active:210, yoy:9, owner:'Sourabh Jayshankar', decision:{d:'Renewed', on:'2026-08-05', by:'Meera Raghavan'} },
+  { id:'chargebee', v:'Chargebee', cat:'Finance', val:1840000, ren:'2026-10-14', type:'Auto-renew', notice:30, bought:80, active:71, yoy:11, owner:'Ananya Deshpande', decision:{d:'Renewed', on:'2026-07-30', by:'Meera Raghavan'} },
+  { id:'fivetran', v:'Fivetran', cat:'Data', val:260000, ren:'2026-10-14', type:'Auto-renew', notice:30, bought:31, active:26, yoy:9, owner:'Rutwik Saha', decision:{d:'Renewed', on:'2026-07-21', by:'Kabir Sethi'} },
+  { id:'amplitude', v:'Amplitude', cat:'Analytics', val:17170000, ren:'2026-10-14', type:'Auto-renew', notice:30, bought:320, active:294, yoy:10, owner:'Gayatri Gupta', decision:{d:'Renewed', on:'2026-07-19', by:'Lakshmi More'} },
+  { id:'census', v:'Census', cat:'Data', val:60000, ren:'2026-10-15', type:'Auto-renew', notice:30, bought:5, active:4, yoy:13, owner:'Priya Nair', decision:{d:'Renewed', on:'2026-08-07', by:'Aisha Singh'} },
+  { id:'klaviyo', v:'Klaviyo', cat:'Marketing', val:6210000, ren:'2026-10-16', type:'Manual', notice:30, bought:320, active:103, yoy:7, owner:'Sourabh More', decision:{d:'Renewed', on:'2026-07-18', by:'Rahul Bora'} },
+  { id:'zaggle-save', v:'Zaggle Save', cat:'Finance', val:2740000, ren:'2026-10-18', type:'Auto-renew', notice:30, bought:176, active:148, yoy:19, owner:'Jatin Saha', decision:{d:'Cancelled', on:'2026-07-16', by:'Trupti Karnik'} },
+  { id:'figjam', v:'FigJam', cat:'Design', val:970000, ren:'2026-12-21', type:'Auto-renew', notice:90, bought:55, active:29, yoy:17, owner:'Manisha Vora', decision:{d:'Cancelled', on:'2026-07-26', by:'Tarun Khanna'} },
+  { id:'enkash-spend', v:'EnKash Spend', cat:'Finance', val:1460000, ren:'2026-11-24', type:'Auto-renew', notice:60, bought:287, active:187, yoy:5, owner:'Gaurav Rathore', decision:{d:'Renewed', on:'2026-07-26', by:'Rahul Bora'} },
+  { id:'sendgrid', v:'SendGrid', cat:'Marketing', val:1610000, ren:'2026-11-03', type:'Auto-renew', notice:30, bought:61, active:35, yoy:19, owner:'Arjun Panda', decision:{d:'Renewed', on:'2026-07-16', by:'Omkar Marathe'} },
+  { id:'miro', v:'Miro', cat:'Design', val:800000, ren:'2026-11-05', type:'Auto-renew', notice:30, bought:150, active:60, yoy:13, owner:'Rohan Iyer', decision:{d:'Cancelled', on:'2026-08-07', by:'Ananya Deshpande'} },
+  { id:'happay-cards', v:'Happay Cards', cat:'Finance', val:23450000, ren:'2026-11-13', type:'Auto-renew', notice:30, bought:320, active:237, yoy:10, owner:'Kabir Sethi', decision:{d:'Renewed', on:'2026-08-08', by:'Jyoti Krishnan'} },
+  { id:'leadsquared', v:'LeadSquared', cat:'Sales', val:540000, ren:'2026-11-29', type:'Auto-renew', notice:45, bought:26, active:22, yoy:13, owner:'Ramya Gupta', decision:{d:'Renewed', on:'2026-07-15', by:'Indrani Saha'} },
+  { id:'bettercloud', v:'BetterCloud', cat:'IT', val:1460000, ren:'2026-11-15', type:'Manual', notice:30, bought:149, active:118, yoy:17, owner:'Nandini Kulkarni', decision:{d:'Renewed', on:'2026-08-04', by:'Anup Acharya'} },
+  { id:'zoho-mail', v:'Zoho Mail', cat:'Communication', val:480000, ren:'2026-12-04', type:'Auto-renew', notice:45, bought:88, active:65, yoy:21, owner:'Siddharth Bora', decision:{d:'Cancelled', on:'2026-08-07', by:'Rutwik Saha'} },
+  { id:'ozonetel', v:'Ozonetel', cat:'Communication', val:1630000, ren:'2026-11-25', type:'Auto-renew', notice:30, bought:320, active:241, yoy:10, owner:'Madhav Saha', decision:{d:'Renewed', on:'2026-07-27', by:'Meera Raghavan'} },
+  { id:'zoho-analytics', v:'Zoho Analytics', cat:'Analytics', val:1110000, ren:'2026-12-01', type:'Manual', notice:30, bought:163, active:62, yoy:8, owner:'Kaushik Wagle', decision:{d:'Cancelled', on:'2026-07-18', by:'kartik Kadam'} },
+  { id:'quicko', v:'Quicko', cat:'Finance', val:5170000, ren:'2026-12-31', type:'Auto-renew', notice:60, bought:320, active:202, yoy:12, owner:'Kabir Sethi', decision:{d:'Renewed', on:'2026-07-17', by:'Aniket Bhat'} },
+  { id:'fullstory', v:'FullStory', cat:'Analytics', val:7640000, ren:'2026-12-02', type:'Auto-renew', notice:30, bought:320, active:119, yoy:18, owner:'Bhushan Ghosh', decision:{d:'Renewed', on:'2026-07-21', by:'Aisha Singh'} },
+  { id:'freshdesk', v:'Freshdesk', cat:'Support', val:760000, ren:'2026-12-21', type:'Manual', notice:45, bought:250, active:131, yoy:6, owner:'Varun Nimbalkar', decision:{d:'Renewed', on:'2026-07-14', by:'Sourabh Jayshankar'} },
+];
+
+/* ── helpers ─────────────────────────────────────────────────── */
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sept','Oct','Nov','Dec'];
+const parseD = s => { const [y,m,dd] = s.split('-').map(Number); return new Date(y, m-1, dd); };
+const daysTo = dt => Math.round((dt - TODAY) / DAY);
+const fmtD  = dt => dt.getDate() + ' ' + MONTHS[dt.getMonth()];
+const fmtDY = dt => dt.getDate() + ' ' + MONTHS[dt.getMonth()] + ' ' + dt.getFullYear();
+const inr = n => '₹' + Math.round(n).toLocaleString('en-IN');
+const cr  = n => '₹' + (n / 1e7).toFixed(2) + ' Cr';
+const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
+
+/* Prior terms, walked backwards off this year's increase. */
+function payHistory(s) {
+  const out = []; let amt = s.val / (1 + s.yoy / 100); let year = s.renD.getFullYear() - 1;
+  out.push({ year, amt: Math.round(amt / 1000) * 1000 });
+  for (const r of [0.09, 0.06]) { amt = amt / (1 + r); year--; out.push({ year, amt: Math.round(amt / 1000) * 1000 }); }
+  return out;
+}
+const payDate = (s, year) => new Date(year, s.renD.getMonth(), s.renD.getDate());
+
+SUBS.forEach(s => {
+  s.renD   = parseD(s.ren);
+  s.actD   = new Date(s.renD - s.notice * DAY);
+  s.dLeft  = daysTo(s.actD);
+  s.dToRen = daysTo(s.renD);
+  s.util   = s.active / s.bought;
+  s.pay    = payHistory(s);
+  if (s.decision) s.decision.onD = parseD(s.decision.on);
+});
+
+const groupOf = s => s.decision ? 'decided' : (s.dLeft <= 7 || !s.owner) ? 'action' : 'soon';
+const GROUPS = [
+  { k:'action',  n:'Action required', hot:true },
+  { k:'soon',    n:'Next 30 days',    hot:false },
+  { k:'decided', n:'Decided',         hot:false },
+];
+const TABS = [{k:'all',n:'All'},{k:'action',n:'Action required'},{k:'soon',n:'Next 30 days'},{k:'decided',n:'Decided'}];
+
+/* ── state ───────────────────────────────────────────────────── */
+const state = { tab:'action', sort:'date', dir:{ date:'asc', value:'desc' }, q:'', openId:null, panel:null, last:null, page:1, pageSize:25 };
+let visibleIds = [];
+
+/* ── icons ───────────────────────────────────────────────────── */
+const I = {
+  check:  '<path d="M20 6 9 17l-5-5"/>',
+  x:      '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+  up:     '<path d="M12 19V5"/><path d="m5 12 7-7 7 7"/>',
+  down:   '<path d="M12 5v14"/><path d="m19 12-7 7-7-7"/>',
+  trend:  '<path d="M16 7h6v6"/><path d="m22 7-8.5 8.5-5-5L2 17"/>',
+  plus:   '<circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/>',
+  cLeft:  '<path d="m15 18-6-6 6-6"/>',
+  cRight: '<path d="m9 18 6-6-6-6"/>',
+  ccLeft: '<path d="m11 17-5-5 5-5"/><path d="m18 17-5-5 5-5"/>',
+  ccRight:'<path d="m13 17 5-5-5-5"/><path d="m6 17 5-5-5-5"/>',
+};
+const svg = (paths, cls, sw = 2) =>
+  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${sw}" stroke-linecap="round"
+        stroke-linejoin="round" class="${cls}" aria-hidden="true">${paths}</svg>`;
+
+/* ═══════════════════════════════════════════════════════════════
+   KPI cards. The table now carries the whole portfolio, so every
+   figure here is summed from the rows below and ties out.
+   ═══════════════════════════════════════════════════════════════ */
+function kpis() {
+  const open = SUBS.filter(s => !s.decision);
+  const week = open.filter(s => s.dLeft <= 7);
+  const noOwn = open.filter(s => !s.owner);
+  const sum = a => a.reduce((t, s) => t + s.val, 0);
+  const tracked = sum(SUBS), openVal = sum(open);
+  const idle = open.reduce((t, s) => t + s.val * (1 - s.util), 0);
+  const prior = open.reduce((t, s) => t + s.val / (1 + s.yoy / 100), 0);
+  const added = openVal - prior;
+  return [
+    { k:'Closing with 7 days',   v:sum(week),  chip:`${week.length} Subscriptions`,                 tone:'red',   go:'action' },
+    { k:'No owner assigned',     v:sum(noOwn), chip:`${Math.round(sum(noOwn) / tracked * 100)}% spend`, tone:'amber', go:'action' },
+    { k:'Unused seat spend',     v:Math.round(idle / 100000) * 100000, chip:`${Math.round(idle / openVal * 100)}% of value`, tone:'' },
+    { k:'Vendor Price Increase', v:Math.round(added / 100000) * 100000, chip:`+${(added / prior * 100).toFixed(1)}%`, tone:'', arrow:true },
+  ];
+}
+const CHIP = { red:'bg-red-50 text-red-600', amber:'bg-amber-50 text-amber-700', '':'border border-border bg-white text-gray-900' };
+
+/* ═══════════════════════════════════════════════════════════════
+   Window bar
+   ═══════════════════════════════════════════════════════════════ */
+function windowBar(s) {
+  const dl = clamp(((LOOKBACK - s.notice) / LOOKBACK) * 100, 3, 96);
+  const td = clamp(((LOOKBACK - s.dToRen) / LOOKBACK) * 100, 3, 96);
+  const urgent = !s.decision && s.dLeft >= 0 && s.dLeft <= 7;
+  const tip = `Notice deadline ${fmtD(s.actD)} · ${s.notice}-day notice · renews ${fmtD(s.renD)}`;
+  return `<div class="relative h-4 w-[100px]" title="${esc(tip)}" aria-hidden="true">
+    <span class="absolute left-0 top-1/2 h-1 -translate-y-1/2 rounded-full bg-gray-200" style="width:${dl}%"></span>
+    <span class="absolute right-0 top-1/2 h-1 -translate-y-1/2 rounded-full bg-gray-400" style="left:calc(${dl}% + 3px)"></span>
+    <span class="absolute top-1/2 h-3 w-[2px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-gray-900" style="left:${dl}%"></span>
+    <span class="absolute top-1/2 h-4 w-[2px] -translate-x-1/2 -translate-y-1/2 rounded-full ${urgent ? 'bg-red-600' : 'bg-gray-900'}" style="left:${td}%"></span>
+  </div>`;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Table
+   ═══════════════════════════════════════════════════════════════ */
+function dayBadge(d) {
+  const cls = d <= 7 ? 'bg-red-600 text-white' : d <= 14 ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-600';
+  return `<span class="badge num ${cls} px-2 py-[5px]">${d}d</span>`;
+}
+function statusPill(label, size = 'md') {
+  const renewed = label === 'Renewed';
+  const cls = renewed ? 'bg-emerald-100 text-emerald-700' : 'bg-red-50 text-red-600';
+  const p = size === 'md' ? 'px-2.5 py-[7px] text-[13px]' : 'px-2 py-[6px] text-[12px]';
+  return `<span class="badge ${cls} ${p}">${svg(renewed ? I.check : I.x, 'h-3.5 w-3.5', 2.5)}${label}</span>`;
+}
+
+function rowHtml(s) {
+  const sel = state.openId === s.id;
+  const act = s.decision
+    ? statusPill(s.decision.d)
+    : `<div class="flex items-center gap-2 leading-5">
+         <span class="num text-[15px] font-medium leading-5 text-gray-900">${fmtD(s.actD)}</span>${dayBadge(s.dLeft)}
+       </div>
+       <div class="num text-[13px] leading-4 text-gray-500">${s.notice}-day notice</div>`;
+  const owner = s.owner
+    ? `<span class="whitespace-nowrap text-[15px] text-gray-900">${esc(s.owner)}</span>`
+    : `<span class="badge border border-amber-200 bg-amber-50 px-2.5 py-[7px] text-[13px] text-amber-700">Unassigned</span>`;
+
+  return `<tr data-id="${s.id}" tabindex="0" role="button"
+      aria-label="Open ${esc(s.v)} renewal details"
+      class="cursor-pointer border-b border-border transition-colors last:border-0
+             ${sel ? 'bg-blue-50/70 hover:bg-blue-50' : 'hover:bg-gray-50/70'}">
+    <td class="td">
+      <div class="truncate text-[15px] font-medium leading-5 text-gray-900">${esc(s.v)}</div>
+      <div class="truncate text-[13px] leading-4 text-gray-500">${esc(s.cat)}</div>
+    </td>
+    <td class="td">
+      <div class="num text-[15px] font-medium leading-5 text-gray-900">${inr(s.val)}</div>
+      <div class="num text-[13px] leading-4 text-gray-500">+${s.yoy}% vs last term</div>
+    </td>
+    <td class="td">${act}</td>
+    <td class="td">${windowBar(s)}</td>
+    <td class="td">
+      <div class="num text-[15px] font-medium leading-5 text-gray-900">${fmtD(s.renD)}</div>
+      <div class="text-[13px] leading-4 text-gray-500">${s.type}</div>
+    </td>
+    <td class="td">
+      <div class="num text-[15px] leading-5 text-gray-500"><span class="font-semibold text-gray-900">${s.active}</span>/${s.bought}</div>
+      <div class="num text-[13px] leading-4 text-gray-500">${Math.round(s.util * 100)}% active</div>
+    </td>
+    <td class="td">${owner}</td>
+  </tr>`;
+}
+
+function groupHeader(g, count, total) {
+  return `<tr class="${g.hot ? 'bg-red-50' : 'bg-gray-50'} border-b border-border">
+    <td colspan="7" class="relative px-4 py-2.5">
+      ${g.hot ? '<span class="absolute inset-y-0 left-0 w-[3px] bg-red-600"></span>' : ''}
+      <span class="num text-[14px] font-medium text-gray-700">${g.n} · ${count} · ${cr(total)}</span>
+    </td></tr>`;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Render
+   ═══════════════════════════════════════════════════════════════ */
+function matches(s) {
+  const q = state.q.trim().toLowerCase();
+  return !q || [s.v, s.cat, s.owner || 'Unassigned'].join(' ').toLowerCase().includes(q);
+}
+function sortRows(rows, gk) {
+  const dir = state.dir[state.sort] === 'asc' ? 1 : -1;
+  return rows.slice().sort((a, b) => {
+    let av, bv;
+    if (state.sort === 'value') { av = a.val; bv = b.val; }
+    else if (gk === 'decided') { av = a.decision.onD.getTime(); bv = b.decision.onD.getTime(); }
+    else { av = a.actD.getTime(); bv = b.actD.getTime(); }
+    return av === bv ? a.v.localeCompare(b.v) : (av - bv) * dir;
+  });
+}
+
+function render() {
+  document.getElementById('kpis').innerHTML = kpis().map(c => {
+    const tag = c.go ? 'button' : 'div';
+    return `<${tag} class="card kpi-card flex flex-col px-6 py-5 text-left${c.go ? ' transition-colors hover:border-gray-300' : ''}"
+        ${c.go ? `data-go="${c.go}"` : ''}>
+      <div class="kpi-head">
+        <span class="whitespace-nowrap text-[15px] leading-5 text-gray-500">${c.k}</span>
+        <span class="badge ${CHIP[c.tone]} px-2 py-[5px] text-xs">${c.arrow ? svg(I.trend, 'h-3 w-3', 2.25) : ''}${c.chip}</span>
+      </div>
+      <p class="num mt-auto pt-3 text-[30px] font-semibold leading-none tracking-[-0.02em] text-gray-950">${inr(c.v)}</p>
+    </${tag}>`;
+  }).join('');
+
+  const counts = {}; GROUPS.forEach(g => counts[g.k] = SUBS.filter(s => groupOf(s) === g.k).length);
+  document.getElementById('tabs').innerHTML = TABS.map(t => {
+    const c = `<span class="seg-count">${t.k === 'all' ? SUBS.length : counts[t.k]}</span>`;
+    return `<button class="seg-item" role="tab" data-tab="${t.k}" aria-selected="${state.tab === t.k}">
+      ${t.n}${c}</button>`;
+  }).join('');
+
+  const flat = [];
+  GROUPS.filter(g => state.tab === 'all' || state.tab === g.k).forEach(g => {
+    const rows = sortRows(SUBS.filter(s => groupOf(s) === g.k).filter(matches), g.k);
+    if (!rows.length) return;
+    const total = rows.reduce((t, x) => t + x.val, 0);
+    rows.forEach(x => flat.push({ g, s:x, count:rows.length, total }));
+  });
+  visibleIds = flat.map(f => f.s.id);
+
+  const pages = Math.max(1, Math.ceil(flat.length / state.pageSize));
+  state.page = Math.min(Math.max(1, state.page), pages);
+  const from = (state.page - 1) * state.pageSize;
+  const slice = flat.slice(from, from + state.pageSize);
+
+  let body = '', lastG = null;
+  slice.forEach(f => {
+    if (f.g.k !== lastG) { body += groupHeader(f.g, f.count, f.total); lastG = f.g.k; }
+    body += rowHtml(f.s);
+  });
+  document.getElementById('tbody').innerHTML = body;
+  document.getElementById('empty').classList.toggle('hidden', flat.length > 0);
+  pager(flat.length, pages, from);
+
+  document.querySelectorAll('#sortMenu [data-sort]').forEach(btn => {
+    const on = btn.dataset.sort === state.sort;
+    btn.querySelector('[data-check]').classList.toggle('opacity-0', !on);
+    btn.setAttribute('aria-checked', String(on));
+    btn.querySelector('[data-dir]').textContent = on
+      ? state.dir[state.sort] === 'asc' ? (state.sort === 'date' ? 'Soonest' : 'Lowest')
+                                        : (state.sort === 'date' ? 'Latest' : 'Highest')
+      : '';
+  });
+  document.getElementById('sortLabel').textContent = state.sort === 'date' ? 'Date' : 'Value';
+
+  drawer();
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Leadership roster. An unowned subscription has nobody to ask,
+   so the question goes up to whoever runs that function.
+   ═══════════════════════════════════════════════════════════════ */
+const HEADS = {
+  Design:        { name:'Nandita Rege',        title:'Head of Design' },
+  Engineering:   { name:'Vikram Sundaram',     title:'Head of Engineering' },
+  DevOps:        { name:'Vikram Sundaram',     title:'Head of Engineering' },
+  Infrastructure:{ name:'Arvind Balakrishnan', title:'Head of Infrastructure' },
+  Observability: { name:'Arvind Balakrishnan', title:'Head of Infrastructure' },
+  Data:          { name:'Shruti Menon',        title:'Head of Data' },
+  Analytics:     { name:'Shruti Menon',        title:'Head of Data' },
+  Security:      { name:'Faisal Khatri',       title:'Head of Security' },
+  Compliance:    { name:'Deepa Iyengar',       title:'Head of Risk and Compliance' },
+  Legal:         { name:'Anand Ranade',        title:'Head of Legal' },
+  Sales:         { name:'Rajat Malhotra',      title:'Head of Sales' },
+  CRM:           { name:'Rajat Malhotra',      title:'Head of Sales' },
+  Marketing:     { name:'Sanya Kohli',         title:'Head of Marketing' },
+  Finance:       { name:'Mahesh Bhagat',       title:'Head of Finance' },
+  Payments:      { name:'Mahesh Bhagat',       title:'Head of Finance' },
+  HR:            { name:'Kavita Nadkarni',     title:'Head of People' },
+  Recruiting:    { name:'Rohit Damle',         title:'Head of Talent' },
+  Support:       { name:'Nithya Venkatesh',    title:'Head of Support' },
+  IT:            { name:'Sameep Chitale',      title:'Head of IT' },
+  Productivity:  { name:'Sameep Chitale',      title:'Head of IT' },
+  Communication: { name:'Sameep Chitale',      title:'Head of IT' },
+};
+const headOf = cat => HEADS[cat] || HEADS.IT;
+
+/* Reasons come in as fragments ("Never assigned"), so each gets its own
+   sentence rather than being spliced mid-clause and lowercased. */
+const noteLine = s => s.ownerNote === 'Never assigned' ? 'No owner has ever been set.'
+  : s.ownerNote ? `No owner is set. ${esc(s.ownerNote)}.` : 'No owner is set.';
+const who = h => `${h.name} \u00b7 ${h.title}`;
+
+/* Four days before the deadline, but never a date that has already gone. */
+function replyBy(s) {
+  const t = new Date(s.actD - 4 * DAY);
+  return t < TODAY ? new Date(TODAY) : t;
+}
+const isToday = dt => dt.getTime() === TODAY.getTime();
+
+const selectField = (id, opts) => `<span class="relative block">
+    <select id="${id}" class="field-inp appearance-none pr-9">${opts}</select>
+    <span class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
+      ${svg('<path d="m6 9 6 6 6-6"/>', 'h-4 w-4', 2)}</span>
+  </span>`;
+
+/* ═══════════════════════════════════════════════════════════════
+   Pager. 238 rows in one scroll is unusable, so rows page while
+   the group headers keep reporting the whole group.
+   ═══════════════════════════════════════════════════════════════ */
+function pager(total, pages, from) {
+  const to = Math.min(from + state.pageSize, total);
+  const nav = (act, icon, on, label) =>
+    `<button class="btn h-8 w-8 border border-border bg-white text-gray-600 shadow-card
+        hover:bg-gray-50 hover:text-gray-900 disabled:opacity-40" data-page="${act}"
+        ${on ? '' : 'disabled'} aria-label="${label}">${svg(icon, 'h-4 w-4', 2)}</button>`;
+  document.getElementById('pager').innerHTML = total === 0 ? '' : `
+    <p class="num text-[13px] text-gray-500">
+      Showing <span class="font-medium text-gray-900">${from + 1}\u2013${to}</span> of
+      <span class="font-medium text-gray-900">${total}</span> subscriptions</p>
+    <div class="ml-auto flex flex-wrap items-center gap-x-5 gap-y-3">
+      <label class="flex items-center gap-2 text-[13px] text-gray-500">Rows per page
+        <span class="relative inline-flex">
+          <select id="pageSize" class="h-8 appearance-none rounded-lg border border-border bg-white pl-2.5 pr-7
+              text-[13px] font-medium text-gray-900 shadow-card focus:border-gray-300">
+            ${[25, 50, 100].map(n => `<option value="${n}"${n === state.pageSize ? ' selected' : ''}>${n}</option>`).join('')}
+          </select>
+          <span class="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-gray-400">
+            ${svg('<path d="m6 9 6 6 6-6"/>', 'h-3.5 w-3.5', 2)}</span>
+        </span></label>
+      <span class="num text-[13px] text-gray-500">Page <span class="font-medium text-gray-900">${state.page}</span> of ${pages}</span>
+      <div class="flex items-center gap-1.5">
+        ${nav('first', I.ccLeft, state.page > 1, 'First page')}
+        ${nav('prev', I.cLeft, state.page > 1, 'Previous page')}
+        ${nav('next', I.cRight, state.page < pages, 'Next page')}
+        ${nav('last', I.ccRight, state.page < pages, 'Last page')}
+      </div>
+    </div>`;
+  const sel = document.getElementById('pageSize');
+  if (sel) sel.onchange = e => { state.pageSize = +e.target.value; state.page = 1; render(); };
+  document.querySelectorAll('#pager [data-page]').forEach(b => b.onclick = () => {
+    const a = b.dataset.page;
+    state.page = a === 'first' ? 1 : a === 'last' ? pages : a === 'prev' ? state.page - 1 : state.page + 1;
+    render();
+    document.querySelector('main').scrollTo({ top:0, behavior:'smooth' });
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Drawer
+   ═══════════════════════════════════════════════════════════════ */
+/* "an" reads correctly before 8, 11 and 18; a 0% renewal is not "up 0%". */
+const pct = n => ([8, 11, 18].includes(n) ? 'an ' : 'a ') + n + '%';
+const bold = t => `<b class="font-medium text-gray-900">${t}</b>`;
+
+function assist(s) {
+  if (!s.owner) return {
+    conf:'Medium', tone:'amber', head:'Ask the team before deciding',
+    why:`Nobody owns this. ${bold(`${s.active} of ${s.bought} seats were active`)} in the last 30 days, which is worth questioning.`,
+  };
+  if (s.util < 0.55) return {
+    conf:'Medium', tone:'amber', head:'Consider non-renewal',
+    why:`${bold(`Only ${s.active} of ${s.bought} seats were active`)} in the last 30 days, and the price is ${s.yoy ? `up ${s.yoy}%` : 'flat'} on the last payment.`,
+  };
+  return {
+    conf:'High', tone:'emerald', head:'Renewing looks reasonable',
+    why:`${bold(`${s.active} of ${s.bought} seats active`)}, with ${s.yoy ? pct(s.yoy) + ' increase' : 'no increase'} on the last payment. Nothing here argues for cancelling.`,
+  };
+}
+
+const TONE = {
+  emerald:{ pill:'border-emerald-200 bg-emerald-50 text-emerald-700', head:'text-emerald-700' },
+  amber:  { pill:'border-amber-200 bg-amber-50 text-amber-700',       head:'text-amber-700' },
+};
+const ALERT = {
+  hot:  'border-red-200 bg-red-50',
+  warm: 'border-amber-200 bg-amber-50/60',
+  calm: 'border-border bg-gray-50',
+};
+
+function fld(k, v) { return `<div><div class="f-k">${k}</div><div class="f-v">${v}</div></div>`; }
+
+function drawer() {
+  const el = document.getElementById('drawer'), sc = document.getElementById('scrim');
+  const s = SUBS.find(x => x.id === state.openId);
+  if (!s) {
+    el.classList.add('translate-x-[calc(100%+1.5rem)]');
+    sc.classList.add('opacity-0', 'pointer-events-none');
+    el.setAttribute('aria-hidden', 'true');
+    return;
+  }
+  el.classList.remove('translate-x-[calc(100%+1.5rem)]');
+  sc.classList.remove('opacity-0', 'pointer-events-none');
+  el.removeAttribute('aria-hidden');
+
+  const i = visibleIds.indexOf(s.id);
+  const hasPrev = i > 0, hasNext = i > -1 && i < visibleIds.length - 1;
+
+  let alert, acts;
+  if (s.decision) {
+    alert = `<div class="rounded-xl border ${ALERT.calm} px-5 py-4">
+      <div>${statusPill(s.decision.d, 'sm')}</div>
+      <p class="num mt-2.5 text-[19px] font-semibold leading-tight tracking-[-0.01em] text-gray-900">${fmtDY(s.decision.onD)}</p>
+      <p class="mt-2.5 text-[14px] leading-relaxed text-gray-600">
+        Recorded by <b class="font-medium text-gray-900">${esc(s.decision.by)}</b>. The last date to cancel is
+        <b class="num font-medium text-gray-900">${fmtDY(s.actD)}</b>, so this can still be changed until then.</p>
+    </div>`;
+    acts = `<button class="btn-act" data-act="undo">Undo Decision</button>`;
+  } else {
+    const tone = s.dLeft <= 7 ? 'hot' : s.dLeft <= 14 ? 'warm' : 'calm';
+    const left = s.dLeft < 0 ? 'deadline passed'
+               : s.dLeft === 0 ? 'last day to act'
+               : s.dLeft === 1 ? '1 day left' : `${s.dLeft} days left`;
+    const vcol = tone === 'calm' ? 'text-gray-900' : 'text-red-700';
+    alert = `<div class="rounded-xl border ${ALERT[tone]} px-5 py-4">
+      <p class="text-[14px] text-gray-600">Last date to cancel</p>
+      <p class="num mt-1.5 text-[19px] font-semibold leading-tight tracking-[-0.01em] ${vcol}">${fmtDY(s.actD)} · ${left}</p>
+      <p class="mt-2.5 text-[14px] leading-relaxed text-gray-600">
+        This contract needs <b class="font-medium text-gray-900">${s.notice} days</b> notice and renews on
+        <b class="num font-medium text-gray-900">${fmtDY(s.renD)}</b>. After ${fmtD(s.actD)} it renews for another
+        year and cannot be stopped.</p>
+    </div>`;
+    acts = `<button class="btn-danger-text" data-act="cancel" aria-pressed="${state.panel === 'cancel'}">Cancel</button>
+      <div class="ml-auto flex gap-2">
+        <button class="btn-act" data-act="ask" aria-pressed="${state.panel === 'ask'}">Ask the ${s.owner ? 'owner' : 'team'}</button>
+        <button class="btn-act" data-act="renew">Renew</button>
+      </div>`;
+  }
+
+  const a = assist(s), t = TONE[a.tone];
+  const assistCard = s.decision ? '' : `
+    <div class="mt-5 overflow-hidden rounded-xl border border-border">
+      <div class="flex items-center gap-2 border-b border-border px-5 py-3">
+        <span class="text-[15px] font-medium text-gray-900">Trellis assistant</span>
+        <span class="badge ml-auto border ${t.pill} px-2.5 py-1 text-[12px]">${a.conf}</span>
+      </div>
+      <div class="px-5 py-4">
+        <p class="text-[17px] font-medium tracking-[-0.01em] ${t.head}">${a.head}</p>
+        <p class="mt-2 text-[14px] leading-relaxed text-gray-600">${a.why}</p>
+      </div>
+      <div class="border-t border-border px-5 py-3 text-[14px] text-gray-600">
+        Trellis never cancels or contacts a vendor. You decide.
+      </div>
+    </div>`;
+
+  const ownerVal = s.owner
+    ? esc(s.owner)
+    : `<button class="btn inline-flex h-auto gap-1.5 p-0 text-[15px] font-medium text-amber-700 hover:text-amber-800"
+         data-act="assign">${svg(I.plus, 'h-[17px] w-[17px]', 1.75)}Assign Owner</button>`;
+
+  el.innerHTML = `
+    <div class="flex items-start gap-3 border-b border-border px-6 py-5">
+      <div class="min-w-0 flex-1">
+        <h2 id="drawerTitle" class="truncate text-[20px] font-medium tracking-[-0.01em] text-gray-950">${esc(s.v)}</h2>
+        <p class="num mt-1 text-[14px] text-gray-500">${inr(s.val)} a year · ${s.type}</p>
+      </div>
+      <div class="flex shrink-0 items-center gap-2">
+        <button class="btn-sq" data-act="prev" ${hasPrev ? '' : 'disabled'} aria-label="Previous subscription">${svg(I.up, 'h-[17px] w-[17px]', 1.75)}</button>
+        <button class="btn-sq" data-act="next" ${hasNext ? '' : 'disabled'} aria-label="Next subscription">${svg(I.down, 'h-[17px] w-[17px]', 1.75)}</button>
+        <button class="btn-ghost-icon h-9 w-9" data-act="close" aria-label="Close">${svg(I.x, 'h-[18px] w-[18px]', 1.75)}</button>
+      </div>
+    </div>
+
+    <div class="scroll-y min-h-0 flex-1 overflow-y-auto px-6 py-5">
+      ${alert}
+      ${assistCard}
+
+      <div class="mt-6">
+        <h3 class="sec-h">Subscription</h3>
+        <div class="mt-4 grid grid-cols-2 gap-x-6 gap-y-5">
+          ${fld('Contract value', `<span class="num">${inr(s.val)}</span> a year`)}
+          ${fld('Renewal date', `<span class="num">${fmtDY(s.renD)}</span>`)}
+          ${fld('Renewal type', s.type)}
+          ${fld('Notice period', `<span class="num">${s.notice}</span> days`)}
+          ${fld('Seats', `<span class="num">${s.active}</span> of <span class="num">${s.bought}</span>`)}
+          ${fld('Internal owner', ownerVal)}
+        </div>
+        ${s.ownerNote ? `<p class="mt-3 text-[13px] text-gray-500">${esc(s.ownerNote)}</p>` : ''}
+      </div>
+
+      <div class="mt-6">
+        <h3 class="sec-h">Payment History</h3>
+        <div class="mt-3">
+          ${s.pay.map(p => `<div class="flex items-baseline justify-between py-2.5">
+            <span class="num text-[14px] text-gray-500">${fmtDY(payDate(s, p.year))}</span>
+            <span class="num text-[15px] font-medium text-gray-900">${inr(p.amt)}</span>
+          </div>`).join('')}
+        </div>
+      </div>
+
+      <div id="panelHost"></div>
+    </div>
+
+    <div class="flex shrink-0 flex-wrap items-center gap-2 border-t border-border px-6 py-4">${acts}</div>`;
+
+  if (state.panel) panelRender(s);
+}
+function panelWrap(title, inner) {
+  return `<div class="mt-6 overflow-hidden rounded-xl border border-border">
+    <div class="flex items-center gap-2 bg-gray-50 px-4 py-3">
+      <span class="text-[14px] font-medium text-gray-900">${title}</span>
+      <button class="btn-ghost-icon ml-auto" data-act="closepanel" aria-label="Close">${svg(I.x, 'h-4 w-4', 2)}</button>
+    </div>
+    <div class="px-4 py-4">${inner}</div></div>`;
+}
+
+function replyByField(s) {
+  const by = replyBy(s);
+  const hint = isToday(by)
+    ? `The notice deadline is ${s.dLeft <= 0 ? 'today' : `in ${s.dLeft} day${s.dLeft === 1 ? '' : 's'}`}, so this needs an answer today.`
+    : 'Four days before the notice deadline, so there is time to act on the answer.';
+  return `<div class="mb-4">
+    <label class="field-lab" for="by">Reply by</label>
+    <input id="by" type="text" class="field-inp num" value="${fmtDY(by)}">
+    <p class="mt-1.5 text-[12.5px] text-gray-500">${hint}</p></div>`;
+}
+
+function panelRender(s) {
+  const host = document.getElementById('panelHost'); if (!host) return;
+  const h = headOf(s.cat);
+
+  if (state.panel === 'cancel') {
+    host.innerHTML = panelWrap(`Cancel ${esc(s.v)}`, `
+      <p class="rounded-lg border border-border bg-gray-50 px-3.5 py-3 text-[13px] leading-relaxed text-gray-600">
+        Notice has to reach the vendor by <b class="num font-medium text-gray-900">${fmtDY(s.actD)}</b>.
+        This contract requires <b class="font-medium text-gray-900">${s.notice} days</b> written notice before it
+        renews on ${fmtD(s.renD)}.</p>
+      <p class="mt-4 text-[13px] font-medium text-gray-800">Before this is done</p>
+      <div class="mt-1 divide-y divide-border">
+        ${[[`Send written notice to the vendor`, `${s.owner || h.name} \u00b7 by ${fmtD(s.actD)}`],
+           [`Save the vendor's confirmation`, `On reply`],
+           [`Remove ${s.active} active users`, `${s.owner || 'Unassigned'} \u00b7 by ${fmtD(s.renD)}`]]
+          .map(([a, b]) => `<label class="flex gap-2.5 py-2.5 text-[13.5px]">
+            <input type="checkbox" class="mt-0.5 h-4 w-4 shrink-0 rounded border-gray-300 text-gray-900 focus:ring-gray-400">
+            <span>${a}<span class="block text-[12.5px] text-gray-500">${b}</span></span></label>`).join('')}
+      </div>
+      <button class="btn-danger mt-4" data-act="confirm-cancel">Record cancellation</button>
+      <p class="mt-2.5 text-[12.5px] text-gray-500">Trellis records the decision. A person still has to send the notice.</p>`);
+  }
+
+  if (state.panel === 'assign') {
+    const opts = [who(h), who(HEADS.Finance), who(HEADS.IT)]
+      .filter((v, i, a) => a.indexOf(v) === i)
+      .map(v => `<option>${esc(v)}</option>`).join('');
+    host.innerHTML = panelWrap('Assign an owner', `
+      <div class="mb-4">
+        <label class="field-lab" for="to">Send to</label>
+        ${selectField('to', opts)}
+        <p class="mt-1.5 text-[12.5px] text-gray-500">${noteLine(s)} The ${esc(h.title)} decides who picks it up.</p>
+      </div>
+      <div class="mb-4">
+        <label class="field-lab" for="msg">Message</label>
+        <textarea id="msg" rows="6" class="field-inp leading-relaxed">${esc(s.v)} has no owner in Trellis. It renews on ${fmtDY(s.renD)} at ${inr(s.val)}${s.yoy ? `, up ${s.yoy}% on the last payment` : ''}, and ${s.active} of ${s.bought} seats were active in the last 30 days. Notice has to be sent by ${fmtD(s.actD)} or it renews for another year. Who on your team should own this subscription?</textarea>
+      </div>
+      ${replyByField(s)}
+      <button class="btn-solid" data-act="send-assign">Send</button>
+      <p class="mt-2.5 text-[12.5px] text-gray-500">Trellis emails the request. Naming the owner is still a person's call.</p>`);
+  }
+
+  if (state.panel === 'ask') {
+    const opts = (s.owner ? [`${s.owner} \u00b7 owner`, who(h)] : [who(h), who(HEADS.Finance)])
+      .concat([who(HEADS.IT)])
+      .filter((v, i, a) => a.indexOf(v) === i)
+      .map(v => `<option>${esc(v)}</option>`).join('');
+    host.innerHTML = panelWrap(`Ask the ${s.owner ? 'owner' : 'team'}`, `
+      <div class="mb-4">
+        <label class="field-lab" for="to">Send to</label>
+        ${selectField('to', opts)}
+        ${s.owner ? '' : `<p class="mt-1.5 text-[12.5px] text-gray-500">No owner is set, so this goes to the ${esc(h.title)}.</p>`}
+      </div>
+      <div class="mb-4">
+        <label class="field-lab" for="msg">Message</label>
+        <textarea id="msg" rows="5" class="field-inp leading-relaxed">${esc(s.v)} renews on ${fmtD(s.renD)} at ${inr(s.val)}, ${s.yoy ? `up ${s.yoy}% on the last payment` : 'flat on the last payment'}. ${s.active} of ${s.bought} seats were active in the last 30 days. Notice has to be sent by ${fmtD(s.actD)} or it renews for another year. Do we still need it?</textarea>
+      </div>
+      ${replyByField(s)}
+      <button class="btn-solid" data-act="send">Send</button>`);
+  }
+
+  host.scrollIntoView({ block:'nearest', behavior:'smooth' });
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Actions
+   ═══════════════════════════════════════════════════════════════ */
+let restoreFocus = null;
+function openDrawer(id, from) {
+  if (from) restoreFocus = from;
+  state.openId = id; state.panel = null; render();
+  const btn = document.querySelector('#drawer [data-act="close"]');
+  if (btn) btn.focus({ preventScroll:true });
+}
+function closeDrawer() {
+  state.openId = null; state.panel = null; render();
+  if (restoreFocus && document.body.contains(restoreFocus)) restoreFocus.focus({ preventScroll:true });
+  restoreFocus = null;
+}
+function step(delta) {
+  const i = visibleIds.indexOf(state.openId);
+  const j = i + delta;
+  if (i < 0 || j < 0 || j >= visibleIds.length) return;
+  state.openId = visibleIds[j];
+  state.page = Math.floor(j / state.pageSize) + 1;
+  state.panel = null; render();
+}
+function decide(id, label) {
+  const s = SUBS.find(x => x.id === id);
+  state.last = { id, prev:s.decision || null };
+  s.decision = { d:label, on:'', onD:new Date(TODAY), by:'Priya Nair' };
+  state.openId = null; state.panel = null;
+  toast(`${label} recorded for ${s.v}.`, true); render();
+}
+function undoDecision(id) {
+  const s = SUBS.find(x => x.id === id);
+  state.last = { id, prev:s.decision };
+  s.decision = null; state.openId = null; state.panel = null;
+  toast(`${s.v} is back in the queue.`, true); render();
+}
+/* Both panels use the same "Send to" field, so one reader serves both.
+   The option value carries the title after a middot; a toast reads better
+   with it in brackets, and the owner needs no title at all. */
+function recipient(s) {
+  const sel = document.getElementById('to');
+  const [name, title] = (sel ? sel.value : who(headOf(s.cat))).split(' · ');
+  return title && title !== 'owner' ? `${name} (${title})` : name;
+}
+function sendMail(s, msg) {
+  state.panel = null; state.openId = null; state.last = null;
+  toast(msg, false); render();
+}
+const sendAsk = s => sendMail(s, `Email has been sent to ${recipient(s)}. Reply due ${fmtD(replyBy(s))}.`);
+const sendAssign = s => sendMail(s, `Email has been sent to ${recipient(s)} about who should own ${s.v}.`);
+function undo() {
+  if (!state.last) return;
+  SUBS.find(x => x.id === state.last.id).decision = state.last.prev;
+  state.last = null; hideToast(); render();
+}
+
+let tt;
+function toast(msg, undoable) {
+  const t = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  document.getElementById('toastUndo').hidden = !undoable;
+  t.classList.remove('opacity-0', 'translate-y-3', 'pointer-events-none');
+  clearTimeout(tt); tt = setTimeout(hideToast, 5000);
+}
+function hideToast() {
+  document.getElementById('toast').classList.add('opacity-0', 'translate-y-3', 'pointer-events-none');
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Wiring
+   ═══════════════════════════════════════════════════════════════ */
+document.getElementById('tbody').addEventListener('click', e => {
+  const tr = e.target.closest('tr[data-id]'); if (tr) openDrawer(tr.dataset.id, tr);
+});
+document.getElementById('tbody').addEventListener('keydown', e => {
+  if (e.key !== 'Enter' && e.key !== ' ') return;
+  const tr = e.target.closest('tr[data-id]'); if (!tr) return;
+  e.preventDefault(); openDrawer(tr.dataset.id, tr);
+});
+document.getElementById('kpis').addEventListener('click', e => {
+  const b = e.target.closest('[data-go]'); if (b) setTab(b.dataset.go);
+});
+document.getElementById('tabs').addEventListener('click', e => {
+  const b = e.target.closest('[data-tab]'); if (b) setTab(b.dataset.tab);
+});
+document.getElementById('drawer').addEventListener('click', e => {
+  const b = e.target.closest('[data-act]'); if (!b) return;
+  const s = SUBS.find(x => x.id === state.openId); if (!s) return;
+  switch (b.dataset.act) {
+    case 'close': closeDrawer(); break;
+    case 'prev': step(-1); break;
+    case 'next': step(1); break;
+    case 'renew': decide(s.id, 'Renewed'); break;
+    case 'undo': undoDecision(s.id); break;
+    case 'cancel': state.panel = state.panel === 'cancel' ? null : 'cancel'; render(); break;
+    case 'ask': state.panel = state.panel === 'ask' ? null : 'ask'; render(); break;
+    case 'closepanel': state.panel = null; render(); break;
+    case 'confirm-cancel': decide(s.id, 'Cancelled'); break;
+    case 'send': sendAsk(s); break;
+    case 'send-assign': sendAssign(s); break;
+    case 'assign': state.panel = state.panel === 'assign' ? null : 'assign'; render(); break;
+  }
+});
+document.getElementById('scrim').addEventListener('click', closeDrawer);
+document.getElementById('toastUndo').addEventListener('click', undo);
+document.getElementById('q').addEventListener('input', e => { state.q = e.target.value; state.page = 1; render(); });
+
+function setTab(k) { state.tab = k; state.panel = null; state.page = 1; render(); }
+
+const sortBtn = document.getElementById('sortBtn'), sortMenu = document.getElementById('sortMenu');
+const setMenu = open => { sortMenu.classList.toggle('hidden', !open); sortBtn.setAttribute('aria-expanded', String(open)); };
+sortBtn.addEventListener('click', e => { e.stopPropagation(); setMenu(sortMenu.classList.contains('hidden')); });
+document.querySelectorAll('#sortMenu [data-sort]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const k = btn.dataset.sort;
+    if (state.sort === k) state.dir[k] = state.dir[k] === 'asc' ? 'desc' : 'asc'; else state.sort = k;
+    state.page = 1; render(); setMenu(false);
+  });
+});
+document.addEventListener('click', e => { if (!sortMenu.contains(e.target) && e.target !== sortBtn) setMenu(false); });
+
+const sidebar = document.getElementById('sidebar'), sbToggle = document.getElementById('sbToggle'), brand = document.getElementById('brand');
+let sbOpen = true;
+function setSidebar(next) {
+  sbOpen = next;
+  sidebar.classList.toggle('w-[216px]', sbOpen);
+  sidebar.classList.toggle('w-[72px]', !sbOpen);
+  document.querySelectorAll('[data-rail-label]').forEach(el => el.classList.toggle('rail-hide', !sbOpen));
+  document.querySelectorAll('.nav-item').forEach(el => { el.classList.toggle('justify-center', !sbOpen); el.classList.toggle('px-3', sbOpen); });
+  document.querySelectorAll('aside#sidebar .btn:not(.nav-item)').forEach(el => el.classList.toggle('justify-center', !sbOpen));
+  brand.classList.toggle('justify-center', !sbOpen);
+  sbToggle.setAttribute('aria-expanded', String(sbOpen));
+  sbToggle.setAttribute('aria-label', sbOpen ? 'Collapse sidebar' : 'Expand sidebar');
+}
+sbToggle.addEventListener('click', () => setSidebar(!sbOpen));
+
+document.addEventListener('keydown', e => {
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'b') { e.preventDefault(); setSidebar(!sbOpen); return; }
+  if (e.key === 'Escape') { setMenu(false); if (state.panel) { state.panel = null; render(); } else if (state.openId) closeDrawer(); return; }
+  if (!state.openId) return;
+  if (e.key === 'ArrowDown' && !e.target.closest('input,textarea,select')) { e.preventDefault(); step(1); }
+  if (e.key === 'ArrowUp' && !e.target.closest('input,textarea,select')) { e.preventDefault(); step(-1); }
+});
+
+render();
+</script>
+</body>
+</html>
